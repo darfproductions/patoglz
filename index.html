@@ -151,6 +151,15 @@
   .check{display:flex;gap:10px;align-items:center;cursor:pointer;font-weight:600;color:var(--ink);font-size:.95rem;margin-bottom:12px}
   .check input{width:18px;height:18px;accent-color:var(--kraft-dark);flex:none}
   .sub-fields{padding-left:28px}
+  .link-btn{background:none;border:0;padding:0;margin:-8px 0 16px;color:var(--kraft-dark);font:inherit;font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .asistente{background:#FFF8EE;border:1.5px solid var(--kraft-light);border-radius:14px;padding:18px 18px 6px;margin-bottom:18px}
+  .asistente h4{font-family:Montserrat,sans-serif;font-size:1rem;margin-bottom:4px}
+  .asistente > p{font-size:.85rem;color:var(--ink-soft);margin-bottom:14px}
+  .asistente .check{font-weight:500;font-size:.9rem}
+  .rec{background:#fff;border-radius:12px;padding:14px 16px;margin:4px 0 14px;font-size:.92rem;color:var(--ink-soft)}
+  .rec b{color:var(--ink)}
+  .rec .big{display:block;font-family:Montserrat,sans-serif;font-size:1.15rem;color:var(--ink);margin:4px 0}
+  .rec .btn{padding:9px 18px;font-size:.9rem;margin-top:10px}
   .calc small{display:block;margin-top:6px;font-size:.78rem;opacity:.85}
   .calc{background:#F6EBDB;border-radius:12px;padding:14px 16px;margin-bottom:18px;font-size:.92rem;color:var(--ink-soft)}
   .calc b{color:var(--ink)}
@@ -495,6 +504,18 @@
           <input id="resistencia" name="resistencia" placeholder="Ej. 32 ECT">
         </div>
       </div>
+      <button type="button" class="link-btn" id="abrirAsistente" aria-expanded="false" aria-controls="asistente">¿No sabes qué resistencia necesitas? Te ayudamos a calcularla</button>
+      <div class="asistente" id="asistente" hidden>
+        <h4>Asistente de resistencia</h4>
+        <p>Contesta estas preguntas y te recomendamos el corrugado, la flauta y la resistencia. Usa también las medidas de la caja que escribiste arriba.</p>
+        <div class="form-row">
+          <div class="field"><label for="pesoCaja">Peso de cada caja ya llena (kg)</label><input id="pesoCaja" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Ej. 12"></div>
+          <div class="field"><label for="estiba">¿Cuántas cajas se apilan una sobre otra?</label><input id="estiba" type="number" min="1" inputmode="numeric" placeholder="Ej. 5"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="humedad"> Estarán en lugar húmedo o refrigerado</label>
+        <label class="check"><input type="checkbox" id="almacen"> Se almacenarán más de 1 mes</label>
+        <div class="rec" id="rec" aria-live="polite">Escribe el peso y cuántas cajas se apilan para ver la recomendación.</div>
+      </div>
       <div class="calc" id="calc" aria-live="polite">Escribe las medidas y la cantidad para revisar si tu pedido cumple con el mínimo.</div>
 
       <div class="extras">
@@ -540,6 +561,7 @@
       <details class="reveal"><summary>¿Cuánto tarda en llegar mi pedido?</summary><p>El tiempo de entrega es de 10 a 15 días a partir de que confirmas tu pedido.</p></details>
       <details class="reveal"><summary>¿A qué zonas entregan?</summary><p>Entregamos en la Ciudad de México y el Estado de México. Si estás en otra zona, escríbenos y lo revisamos.</p></details>
       <details class="reveal"><summary>¿Qué diferencia hay entre sencillo y doble corrugado?</summary><p>El sencillo corrugado tiene una capa ondulada y funciona para la mayoría de los productos ligeros y medianos. El doble corrugado tiene dos capas, es más rígido y resiste más peso y estiba. Es ideal para producto pesado o para exportación.</p></details>
+      <details class="reveal"><summary>¿Qué resistencia necesito?</summary><p>Depende del peso de cada caja, de cuántas cajas se apilan y de si estarán en un lugar húmedo o por mucho tiempo en bodega. En el <a href="#cotizar">cotizador</a> tienes un asistente que te da una recomendación; nosotros la confirmamos contigo antes de tu pedido.</p></details>
       <details class="reveal"><summary>¿Qué diferencia hay entre caja regular y caja suajada?</summary><p>La caja regular tiene cuatro solapas arriba y abajo y se cierra con cinta; es la más económica para envío y almacenaje. La caja suajada se corta con un suaje (troquel) a una forma especial: puede ser autoarmable, llevar pestañas, ventanas o asas. En el cotizador calculamos la lámina regular; si necesitas lámina suajada, márcalo con sus medidas y te la cotizamos aparte.</p></details>
       <details class="reveal"><summary>No sé qué medidas necesito, ¿me pueden ayudar?</summary><p>Claro. Mándanos por WhatsApp una foto de tu producto, sus medidas aproximadas, el peso y cuántas piezas quieres por caja, y te recomendamos la caja ideal.</p></details>
       <details class="reveal"><summary>¿Cómo mido mi caja?</summary><p>Se miden las medidas interiores en este orden: largo (el lado más grande de la base), ancho (el lado más corto de la base) y alto. Todas en centímetros.</p></details>
@@ -678,6 +700,62 @@
   actualizarFlautas();
 
   ["largo", "ancho", "alto", "cantidad"].forEach(id => $(id).addEventListener("input", actualizarCalc));
+
+  // ====== ASISTENTE DE RESISTENCIA ======
+  // Recomendación orientativa con la fórmula de McKee (resistencia a la compresión de la caja)
+  // y límites de peso por caja usuales en la industria. La confirmamos siempre con el cliente.
+  const CALIBRE_PULG = { E: 1 / 16, B: 1 / 8, C: 5 / 32, BC: 1 / 4 };          // grosor de la lámina
+  const GRADOS = {                                                               // ECT (lb/in) y peso máx. por caja (kg)
+    Sencillo: [[26, 16], [29, 20], [32, 29], [40, 36], [44, 43]],
+    Doble:    [[42, 27], [48, 36], [51, 45], [61, 54], [71, 63], [82, 72]]
+  };
+  let recomendacion = null, usoAsistente = null;
+
+  function calcularResistencia() {
+    const rec = $("rec"), peso = +$("pesoCaja").value, n = Math.max(1, Math.round(+$("estiba").value || 0));
+    recomendacion = null;
+    if (!(peso > 0) || !(+$("estiba").value >= 1)) { rec.textContent = "Escribe el peso y cuántas cajas se apilan para ver la recomendación."; return; }
+    let factor = 3;                                   // margen de seguridad base
+    if ($("humedad").checked) factor *= 1.4;
+    if ($("almacen").checked) factor *= 1.25;
+    const cargaKg = peso * Math.max(1, n - 1) * factor;      // compresión que debe aguantar la caja de abajo
+    const cargaLb = cargaKg * 2.20462;
+    const L = +$("largo").value, A = +$("ancho").value;
+    const perimIn = (L > 0 && A > 0) ? (2 * (L + A)) / 2.54 : null;
+
+    const ectNecesario = fl => perimIn ? cargaLb / (5.87 * Math.sqrt(CALIBRE_PULG[fl] * perimIn)) : 0;
+    const flautaSencillo = $("corrugado").value === "Sencillo" ? $("flauta").value : "C";
+    const opciones = [["Sencillo", flautaSencillo], ["Sencillo", "C"], ["Doble", "BC"]];
+    for (const [corr, fl] of opciones) {
+      const g = GRADOS[corr].find(([ect, maxKg]) => ect >= ectNecesario(fl) && maxKg >= peso);
+      if (g) { recomendacion = { corrugado: corr, flauta: fl, ect: g[0] }; break; }
+    }
+    if (!recomendacion) {
+      rec.innerHTML = "Por el peso y la estiba, tu producto necesita un empaque especial. <b>Escríbenos y te asesoramos.</b>";
+      return;
+    }
+    const r = recomendacion;
+    rec.innerHTML = `Te recomendamos:
+      <span class="big">Corrugado ${r.corrugado.toLowerCase()} · Flauta ${r.flauta} · ${r.ect} ECT</span>
+      La caja de abajo debe aguantar aprox. <b>${Math.round(cargaKg)} kg</b> (incluye margen de seguridad).
+      ${perimIn ? "" : "<br><small>Escribe el largo y ancho de la caja arriba para una recomendación más precisa.</small>"}
+      <br><button type="button" class="btn btn-primary" id="usarRec">Usar esta recomendación</button>`;
+    $("usarRec").addEventListener("click", () => {
+      $("corrugado").value = r.corrugado; actualizarFlautas(); $("flauta").value = r.flauta;
+      $("resistencia").value = `${r.ect} ECT`;
+      usoAsistente = `${peso} kg por caja, ${n} cajas apiladas${$("humedad").checked ? ", humedad/refrigeración" : ""}${$("almacen").checked ? ", almacenaje +1 mes" : ""}`;
+      $("asistente").hidden = true; $("abrirAsistente").setAttribute("aria-expanded", false);
+      $("resistencia").focus();
+    });
+  }
+  $("abrirAsistente").addEventListener("click", () => {
+    const abierto = $("asistente").hidden;
+    $("asistente").hidden = !abierto; $("abrirAsistente").setAttribute("aria-expanded", abierto);
+    if (abierto) calcularResistencia();
+  });
+  ["pesoCaja", "estiba", "largo", "ancho"].forEach(id => $(id).addEventListener("input", calcularResistencia));
+  ["humedad", "almacen", "corrugado", "flauta"].forEach(id => $(id).addEventListener("change", calcularResistencia));
+  $("resistencia").addEventListener("input", () => usoAsistente = null);
   $("reqSuaje").addEventListener("change", e => $("suajeFields").hidden = !e.target.checked);
   $("reqImpresion").addEventListener("change", e => $("impresionFields").hidden = !e.target.checked);
 
@@ -711,6 +789,7 @@
       `Corrugado: ${v("corrugado")}`,
       `Flauta: ${v("flauta")}`,
       `Resistencia: ${v("resistencia") || "No indicada"}`,
+      usoAsistente ? `(Resistencia calculada con el asistente: ${usoAsistente})` : null,
       "",
       "*EXTRAS (COTIZAR APARTE)*",
       `Lámina suajada: ${suaje ? "SÍ, " + medSuaje : "No"}`,
