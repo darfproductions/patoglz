@@ -258,6 +258,7 @@
       <li><a href="#proceso">Cómo trabajamos</a></li>
       <li><a href="#preguntas">Preguntas</a></li>
       <li><a href="#contacto">Contacto</a></li>
+      <li><a href="cuenta.html" id="linkCuenta">Mi cuenta</a></li>
     </ul>
     <a class="btn btn-wa wa-link" href="#" data-msg="Hola, me interesa cotizar cajas de cartón corrugado.">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.7 11.5 11.5 0 0 0 4.4 3.9c1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.4-.3Z"/></svg>
@@ -478,6 +479,7 @@
     </div>
 
     <form id="quoteForm" class="reveal" novalidate>
+      <div class="calc" id="cuentaAviso" hidden></div>
       <div class="form-row">
         <div class="field"><label for="nombre">Nombre *</label><input id="nombre" name="nombre" required autocomplete="name" placeholder="Tu nombre"></div>
         <div class="field"><label for="empresa">Empresa</label><input id="empresa" name="empresa" autocomplete="organization" placeholder="Nombre de tu empresa"></div>
@@ -634,6 +636,9 @@
   <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.7 11.5 11.5 0 0 0 4.4 3.9c1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.4-.3Z"/></svg>
 </a>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
 <script>
   // ====== CONFIGURACIÓN DEL NEGOCIO ======
   const WHATSAPP = "525513326185";               // 52 + número a 10 dígitos
@@ -762,7 +767,7 @@
   // Envío del formulario
   let via = "wa";
   document.querySelectorAll("#quoteForm [data-via]").forEach(b => b.addEventListener("click", () => via = b.dataset.via));
-  $("quoteForm").addEventListener("submit", e => {
+  $("quoteForm").addEventListener("submit", async e => {
     e.preventDefault();
     const req = ["nombre", "tel"];
     let ok = true;
@@ -797,15 +802,58 @@
       `Otros requerimientos: ${otros || "Ninguno"}`,
       (suaje || impresion || otros) ? "\n>> Requiere cotización adicional." : null
     ].filter(x => x !== null);
+    // Con sesión iniciada, la cotización también se guarda como pedido en su cuenta
+    const ventana = (via === "wa" && sesionActual) ? window.open("", "_blank") : null;
+    if (sesionActual) {
+      const n = id => +v(id) > 0 ? +v(id) : null;
+      const { data, error } = await GC.client.from("orders").insert({
+        user_id: sesionActual.id,
+        largo: n("largo"), ancho: n("ancho"), alto: n("alto"), cantidad: n("cantidad") && Math.round(n("cantidad")),
+        corrugado: v("corrugado"), flauta: v("flauta"), resistencia: v("resistencia") || null,
+        resistencia_asistente: usoAsistente, cumple_minimo: cumple,
+        req_suaje: suaje, suaje_largo: suaje ? n("lamLargo") : null, suaje_ancho: suaje ? n("lamAncho") : null,
+        req_impresion: impresion, impresion_det: impresion ? v("impresionDet") || null : null,
+        otros: otros || null, producto: v("producto") || null
+      }).select("id").single();
+      if (!error) {
+        lineas.splice(2, 0, `Folio: ${GC.folio(data.id)}`);
+        $("cuentaAviso").hidden = false; $("cuentaAviso").className = "calc ok";
+        $("cuentaAviso").innerHTML = `Tu cotización se guardó con el folio <b>${GC.folio(data.id)}</b>. Puedes ver su estado en <a href="cuenta.html?pedido=${data.id}">Mi cuenta</a>.`;
+      }
+    }
     const msg = lineas.join("\n");
 
     if (via === "mail") {
       const asunto = `Cotización de cajas - ${v("empresa") || v("nombre")}`;
       window.location.href = `mailto:${EMAILS.join(",")}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(msg)}`;
+    } else if (ventana) {
+      ventana.opener = null; ventana.location.href = waUrl(msg);
     } else {
       window.open(waUrl(msg), "_blank", "noopener");
     }
   });
+
+  // Sesión: rellenar datos del cliente y avisar que se guardará en su cuenta
+  let sesionActual = null;
+  (async () => {
+    if (!window.GC || !GC.configured) return;
+    const { user, profile } = await GC.sesion();
+    const aviso = $("cuentaAviso");
+    aviso.hidden = false;
+    if (!user) {
+      aviso.innerHTML = `¿Ya tienes cuenta? <a href="cuenta.html">Inicia sesión</a> para guardar tu cotización y ver el estado de tu pedido.`;
+      return;
+    }
+    sesionActual = user;
+    $("linkCuenta").textContent = profile?.role === "staff" ? "Panel staff" : "Mis pedidos";
+    $("linkCuenta").href = profile?.role === "staff" ? "panel.html" : "cuenta.html";
+    if (profile) {
+      if (!$("nombre").value) $("nombre").value = profile.nombre || "";
+      if (!$("empresa").value) $("empresa").value = profile.empresa || "";
+      if (!$("tel").value) $("tel").value = profile.telefono || "";
+    }
+    aviso.innerHTML = `Sesión iniciada como <b>${GC.esc(profile?.nombre || user.email)}</b>. Tu cotización se guardará en <a href="cuenta.html">tu cuenta</a>.`;
+  })();
 </script>
 </body>
 </html>

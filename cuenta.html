@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Mi cuenta | Gloria Curiel</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6 58 19 32 32 6 19Z' fill='%23D9A86C'/%3E%3Cpath d='M6 19 32 32v26L6 45Z' fill='%23B9824A'/%3E%3Cpath d='M58 19 32 32v26l26-13Z' fill='%23A06E3B'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="index.html" class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 58 19 32 32 6 19Z" fill="#D9A86C"/><path d="M6 19 32 32v26L6 45Z" fill="#B9824A"/><path d="M58 19 32 32v26l26-13Z" fill="#A06E3B"/><path d="M19 12.5 45 25.5v8l-6 3v-8L13 15.5Z" fill="#F1DDBC"/></svg>
+      <div><b>Gloria Curiel</b><small>Mi cuenta</small></div>
+    </a>
+    <nav>
+      <a href="index.html" class="hide-sm">Inicio</a>
+      <a href="index.html#cotizar">Cotizar</a>
+      <a href="panel.html" id="linkPanel" hidden>Panel staff</a>
+      <span class="who hide-sm" id="who"></span>
+      <button class="btn ghost small" id="salir" hidden>Salir</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="notice" id="noConfig" hidden>
+    <b>Inicio de sesión aún no conectado.</b> Falta conectar la base de datos (Supabase) en <code>assets/config.js</code>.
+  </div>
+
+  <!-- ====== LOGIN / REGISTRO ====== -->
+  <section class="auth" id="vistaAuth" hidden>
+    <h1 class="title">Bienvenido</h1>
+    <p class="lead">Entra para ver tus pedidos y el estado de tus cajas.</p>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="login">Iniciar sesión</button>
+      <button role="tab" aria-selected="false" data-tab="registro">Crear cuenta</button>
+    </div>
+
+    <form class="card" id="fLogin">
+      <div class="field"><label for="lEmail">Correo</label><input id="lEmail" type="email" required autocomplete="email"></div>
+      <div class="field"><label for="lPass">Contraseña</label><input id="lPass" type="password" required autocomplete="current-password"></div>
+      <button class="btn primary" style="width:100%">Entrar</button>
+      <p style="margin-top:12px;text-align:center"><a href="#" id="olvide">¿Olvidaste tu contraseña?</a></p>
+      <div class="msg" id="lMsg" hidden></div>
+    </form>
+
+    <form class="card" id="fRegistro" hidden>
+      <div class="field"><label for="rNombre">Nombre *</label><input id="rNombre" required autocomplete="name"></div>
+      <div class="field"><label for="rEmpresa">Empresa</label><input id="rEmpresa" autocomplete="organization"></div>
+      <div class="field"><label for="rTel">Teléfono / WhatsApp *</label><input id="rTel" type="tel" required autocomplete="tel"></div>
+      <div class="field"><label for="rEmail">Correo *</label><input id="rEmail" type="email" required autocomplete="email"></div>
+      <div class="field"><label for="rPass">Contraseña * <span class="muted">(mínimo 8 caracteres)</span></label><input id="rPass" type="password" minlength="8" required autocomplete="new-password"></div>
+      <button class="btn primary" style="width:100%">Crear cuenta</button>
+      <div class="msg" id="rMsg" hidden></div>
+    </form>
+  </section>
+
+  <!-- ====== MIS PEDIDOS ====== -->
+  <section id="vistaPedidos" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+      <div><h1 class="title">Mis pedidos</h1><p class="muted" id="hola"></p></div>
+      <a class="btn primary" href="index.html#cotizar">+ Nueva cotización</a>
+    </div>
+    <div class="orders" id="lista"></div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <div class="dlg-head"><h2 id="dTitulo"></h2><button class="x" id="dCerrar" aria-label="Cerrar">×</button></div>
+  <div class="dlg-body" id="dBody"></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+  const { client, esc, fecha, fechaHora, dinero, num, folio, badge, estado, ESTADOS } = GC;
+  const $ = id => document.getElementById(id);
+  const show = (el, on) => el.hidden = !on;
+  const aviso = (el, txt, tipo = "err") => { el.hidden = !txt; el.className = "msg " + tipo; el.textContent = txt || ""; };
+  let pedidos = [];
+
+  // Tabs login / registro
+  document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-tab]").forEach(x => x.setAttribute("aria-selected", x === b));
+    show($("fLogin"), b.dataset.tab === "login"); show($("fRegistro"), b.dataset.tab === "registro");
+  }));
+
+  const traducir = m => /Invalid login/i.test(m) ? "Correo o contraseña incorrectos."
+    : /already registered/i.test(m) ? "Ya existe una cuenta con ese correo."
+    : /Email not confirmed/i.test(m) ? "Confirma tu correo: te enviamos un enlace para activar tu cuenta."
+    : m;
+
+  $("fLogin").addEventListener("submit", async e => {
+    e.preventDefault(); aviso($("lMsg"));
+    const { error } = await client.auth.signInWithPassword({ email: $("lEmail").value.trim(), password: $("lPass").value });
+    if (error) return aviso($("lMsg"), traducir(error.message));
+    iniciar();
+  });
+
+  $("fRegistro").addEventListener("submit", async e => {
+    e.preventDefault(); aviso($("rMsg"));
+    const { data, error } = await client.auth.signUp({
+      email: $("rEmail").value.trim(), password: $("rPass").value,
+      options: { data: { nombre: $("rNombre").value.trim(), empresa: $("rEmpresa").value.trim(), telefono: $("rTel").value.trim() },
+                 emailRedirectTo: location.href.split("#")[0] }
+    });
+    if (error) return aviso($("rMsg"), traducir(error.message));
+    if (!data.session) return aviso($("rMsg"), "¡Listo! Te enviamos un correo para confirmar tu cuenta. Después inicia sesión.", "ok");
+    iniciar();
+  });
+
+  $("olvide").addEventListener("click", async e => {
+    e.preventDefault();
+    const email = $("lEmail").value.trim();
+    if (!email) return aviso($("lMsg"), "Escribe tu correo y vuelve a dar clic en “¿Olvidaste tu contraseña?”.");
+    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("#")[0] });
+    aviso($("lMsg"), error ? traducir(error.message) : "Te enviamos un correo para cambiar tu contraseña.", error ? "err" : "ok");
+  });
+
+  $("salir").addEventListener("click", async () => { await client.auth.signOut(); location.reload(); });
+
+  // ====== Pedidos ======
+  function resumen(o) {
+    const med = o.largo ? `${num(o.largo)} × ${num(o.ancho)} × ${num(o.alto)} cm` : "Medidas por definir";
+    return `${med} · ${o.cantidad ? num(o.cantidad) + " cajas" : "cantidad por definir"}`;
+  }
+  function pintarLista() {
+    if (!pedidos.length) {
+      $("lista").innerHTML = `<div class="card empty">Aún no tienes pedidos.<br><br><a class="btn primary" href="index.html#cotizar">Hacer mi primera cotización</a></div>`;
+      return;
+    }
+    $("lista").innerHTML = pedidos.map(o => `
+      <button class="order" data-id="${o.id}">
+        <b>${folio(o.id)}</b> ${badge(o.status)}
+        <span class="meta">${esc(resumen(o))} · ${fecha(o.created_at)}${o.precio != null ? " · " + dinero(o.precio) : ""}</span>
+      </button>`).join("");
+    document.querySelectorAll(".order").forEach(b => b.addEventListener("click", () => abrir(+b.dataset.id)));
+  }
+
+  async function abrir(id) {
+    const o = pedidos.find(p => p.id === id);
+    const { data: hist } = await client.from("order_history").select("status, created_at").eq("order_id", id).order("created_at");
+    const flujo = ESTADOS.filter(e => e.key !== "cancelado").map(e => e.key);
+    const pasos = o.status === "cancelado" ? [...new Set((hist || []).map(h => h.status))] : flujo;
+    const idxActual = pasos.indexOf(o.status);
+    const fechaDe = k => { const h = (hist || []).filter(x => x.status === k).pop(); return h ? fechaHora(h.created_at) : ""; };
+    const linea = pasos.map((k, i) => `<li class="${i < idxActual ? "done" : i === idxActual ? "now" : ""}">${esc(estado(k).label)}<small>${fechaDe(k)}</small></li>`).join("");
+    const si = (c, t) => c ? t : "";
+    $("dTitulo").innerHTML = `Pedido ${folio(o.id)} ${badge(o.status)}`;
+    $("dBody").innerHTML = `
+      <div class="grid2">
+        <div>
+          <h3 style="font-size:1rem;margin-bottom:8px">Estado</h3>
+          <ul class="timeline">${linea}</ul>
+          ${o.fecha_entrega ? `<p><b>Entrega estimada:</b> ${fecha(o.fecha_entrega)}</p>` : ""}
+          ${o.precio != null ? `<p style="margin-top:6px"><b>Precio:</b> ${dinero(o.precio)}</p>` : ""}
+          ${o.mensaje_cliente ? `<div class="notice" style="margin-top:12px"><b>Mensaje de Gloria Curiel:</b><br>${esc(o.mensaje_cliente)}</div>` : ""}
+        </div>
+        <div>
+          <h3 style="font-size:1rem;margin-bottom:8px">Detalle</h3>
+          <dl class="spec">
+            <dt>Medidas</dt><dd>${o.largo ? `${num(o.largo)} × ${num(o.ancho)} × ${num(o.alto)} cm` : "—"}</dd>
+            <dt>Cantidad</dt><dd>${o.cantidad ? num(o.cantidad) : "—"}</dd>
+            <dt>Corrugado</dt><dd>${esc(o.corrugado || "—")}</dd>
+            <dt>Flauta</dt><dd>${esc(o.flauta || "—")}</dd>
+            <dt>Resistencia</dt><dd>${esc(o.resistencia || "—")}</dd>
+            <dt>Lámina suajada</dt><dd>${o.req_suaje ? "Sí" + (o.suaje_largo ? ` · ${num(o.suaje_largo)} × ${num(o.suaje_ancho)} cm` : "") : "No"}</dd>
+            <dt>Impresión</dt><dd>${o.req_impresion ? "Sí" + si(o.impresion_det, " · " + esc(o.impresion_det)) : "No"}</dd>
+            ${si(o.otros, `<dt>Otros</dt><dd>${esc(o.otros)}</dd>`)}
+            ${si(o.producto, `<dt>Producto</dt><dd>${esc(o.producto)}</dd>`)}
+            <dt>Solicitado</dt><dd>${fechaHora(o.created_at)}</dd>
+          </dl>
+        </div>
+      </div>
+      ${["cotizacion_solicitada", "cotizado"].includes(o.status) ? `<p style="margin-top:18px"><button class="btn ghost small" id="cancelar">Cancelar esta solicitud</button></p>` : ""}`;
+    const c = $("cancelar");
+    if (c) c.addEventListener("click", async () => {
+      if (!confirm("¿Seguro que quieres cancelar este pedido?")) return;
+      const { error } = await client.from("orders").update({ status: "cancelado" }).eq("id", o.id);
+      if (error) return alert("No se pudo cancelar: " + error.message);
+      $("dlg").close(); cargar();
+    });
+    $("dlg").showModal();
+  }
+  $("dCerrar").addEventListener("click", () => $("dlg").close());
+
+  async function cargar() {
+    const { data, error } = await client.from("orders")
+      .select("id, created_at, status, largo, ancho, alto, cantidad, corrugado, flauta, resistencia, req_suaje, suaje_largo, suaje_ancho, req_impresion, impresion_det, otros, producto, precio, mensaje_cliente, fecha_entrega")
+      .order("created_at", { ascending: false });
+    if (error) { $("lista").innerHTML = `<div class="msg err">No se pudieron cargar tus pedidos: ${esc(error.message)}</div>`; return; }
+    pedidos = data; pintarLista();
+    const abrirId = +new URLSearchParams(location.search).get("pedido");
+    if (abrirId && pedidos.some(p => p.id === abrirId)) abrir(abrirId);
+  }
+
+  async function iniciar() {
+    if (!GC.configured) { show($("noConfig"), true); show($("vistaAuth"), true); return; }
+    const { user, profile } = await GC.sesion();
+    show($("vistaAuth"), !user); show($("vistaPedidos"), !!user); show($("salir"), !!user);
+    if (!user) return;
+    show($("linkPanel"), profile?.role === "staff");
+    $("who").textContent = user.email;
+    $("hola").textContent = `Hola, ${profile?.nombre || user.email}`;
+    cargar();
+  }
+  iniciar();
+</script>
+</body>
+</html>

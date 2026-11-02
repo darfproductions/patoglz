@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel staff | Gloria Curiel</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6 58 19 32 32 6 19Z' fill='%23D9A86C'/%3E%3Cpath d='M6 19 32 32v26L6 45Z' fill='%23B9824A'/%3E%3Cpath d='M58 19 32 32v26l26-13Z' fill='%23A06E3B'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="index.html" class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 58 19 32 32 6 19Z" fill="#D9A86C"/><path d="M6 19 32 32v26L6 45Z" fill="#B9824A"/><path d="M58 19 32 32v26l26-13Z" fill="#A06E3B"/><path d="M19 12.5 45 25.5v8l-6 3v-8L13 15.5Z" fill="#F1DDBC"/></svg>
+      <div><b>Gloria Curiel</b><small>Panel staff</small></div>
+    </a>
+    <nav>
+      <a href="index.html" class="hide-sm">Página</a>
+      <span class="who hide-sm" id="who"></span>
+      <button class="btn ghost small" id="salir" hidden>Salir</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="notice" id="noConfig" hidden>
+    <b>Base de datos aún no conectada.</b> Los pedidos aparecerán cuando se conecte Supabase en <code>assets/config.js</code>. La calculadora sí funciona.
+  </div>
+  <div class="notice" id="noAcceso" hidden>
+    Esta sección es solo para el staff de Gloria Curiel. <a href="cuenta.html">Inicia sesión</a> con una cuenta de staff.
+  </div>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" aria-selected="true" data-tab="pedidos">Pedidos</button>
+    <button role="tab" aria-selected="false" data-tab="calc">Calculadora</button>
+    <button role="tab" aria-selected="false" data-tab="clientes">Clientes</button>
+  </div>
+
+  <!-- ====== PEDIDOS ====== -->
+  <section id="tab-pedidos">
+    <div class="counts" id="counts"></div>
+    <div class="toolbar"><input id="buscar" type="search" placeholder="Buscar por folio, cliente, empresa o teléfono…"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Folio</th><th>Fecha</th><th>Cliente</th><th>Medidas</th><th>Cant.</th><th>m² total</th><th>Mínimo</th><th>Extras</th><th>Estado</th></tr></thead>
+        <tbody id="tbody"><tr><td colspan="9" class="empty">Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ====== CALCULADORA ====== -->
+  <section id="tab-calc" hidden>
+    <div class="card">
+      <h2>1. Pega el mensaje del cliente</h2>
+      <textarea id="pegar" placeholder="Pega aquí el mensaje que te llegó por WhatsApp o correo…" style="min-height:140px"></textarea>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap"><button class="btn" id="leer">Leer mensaje</button><button class="btn ghost" id="limpiar">Limpiar</button></div>
+      <div class="msg err" id="cMsg" hidden></div>
+    </div>
+    <div class="card">
+      <h2>2. O escribe los datos</h2>
+      <div class="row">
+        <div><label for="cL">Largo (cm)</label><input id="cL" type="number" min="0" inputmode="decimal"></div>
+        <div><label for="cA">Ancho (cm)</label><input id="cA" type="number" min="0" inputmode="decimal"></div>
+        <div><label for="cH">Alto (cm)</label><input id="cH" type="number" min="0" inputmode="decimal"></div>
+        <div><label for="cQ">Cantidad</label><input id="cQ" type="number" min="0" inputmode="numeric"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Resultado</h2>
+      <div id="cRes"></div>
+      <p class="muted" style="margin-top:10px">Fórmula lámina regular: (2L + 2A + 4) × (A + H) en cm · 4 cm de ceja de pegue · mínimo 400 m².</p>
+      <div class="notice" id="cExtra" hidden style="margin-top:12px;white-space:pre-line"></div>
+    </div>
+  </section>
+
+  <!-- ====== CLIENTES ====== -->
+  <section id="tab-clientes" hidden>
+    <div class="toolbar"><input id="buscarCli" type="search" placeholder="Buscar cliente…"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nombre</th><th>Empresa</th><th>Teléfono</th><th>Correo</th><th>Pedidos</th><th>Rol</th><th>Alta</th></tr></thead>
+        <tbody id="tbodyCli"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <div class="dlg-head"><h2 id="dTitulo"></h2><button class="x" id="dCerrar" aria-label="Cerrar">×</button></div>
+  <div class="dlg-body" id="dBody"></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+<script>
+  const { client, esc, fecha, fechaHora, dinero, num, folio, badge, estado, ESTADOS, calculo, MINIMO_M2 } = GC;
+  const $ = id => document.getElementById(id);
+  let pedidos = [], perfiles = {}, filtro = "activos";
+
+  // ---------- Tabs ----------
+  document.querySelectorAll("#tabs [data-tab]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("#tabs [data-tab]").forEach(x => {
+      x.setAttribute("aria-selected", x === b);
+      $("tab-" + x.dataset.tab).hidden = x !== b;
+    });
+  }));
+
+  // ---------- Calculadora ----------
+  function resultadoHTML(L, A, H, Q) {
+    const c = calculo(L, A, H, Q);
+    if (!c) return `<p class="muted">Escribe las medidas para ver el cálculo.</p>`;
+    const cumple = c.total != null ? c.total >= MINIMO_M2 : null;
+    return `<div class="stat-boxes">
+        <div><span>Lámina regular</span><b>${num(c.lL)} × ${num(c.lA)} cm</b></div>
+        <div><span>m² por caja</span><b>${num(c.m2)}</b></div>
+        <div><span>m² totales</span><b>${c.total != null ? num(c.total) : "—"}</b></div>
+        <div><span>Mínimo de cajas</span><b>${num(c.minCajas)}</b></div>
+      </div>
+      ${cumple === null ? "" : `<div class="status-line ${cumple ? "ok" : "warn"}">${cumple ? "✓ Cumple con el pedido mínimo" : `✗ No cumple: faltan ${num(MINIMO_M2 - c.total)} m²`}</div>`}`;
+  }
+  const calcular = () => $("cRes").innerHTML = resultadoHTML(+$("cL").value, +$("cA").value, +$("cH").value, +$("cQ").value);
+  ["cL", "cA", "cH", "cQ"].forEach(id => $(id).addEventListener("input", calcular));
+  function leer() {
+    const t = $("pegar").value; $("cMsg").hidden = true;
+    const m = t.match(/(\d+(?:[.,]\d+)?)\s*[×x]\s*(\d+(?:[.,]\d+)?)\s*[×x]\s*(\d+(?:[.,]\d+)?)/i);
+    const q = t.match(/Cantidad:\s*([\d.,]+)/i);
+    if (!m) { $("cMsg").hidden = false; $("cMsg").textContent = "No encontré las medidas (L × A × H). Escríbelas a mano."; }
+    else { $("cL").value = m[1].replace(",", "."); $("cA").value = m[2].replace(",", "."); $("cH").value = m[3].replace(",", "."); }
+    $("cQ").value = q ? q[1].replace(/[.,]/g, "") : "";
+    const linea = k => (t.match(new RegExp(k + ":\\s*(.+)", "i")) || [])[1];
+    const extras = [["Cliente", "Nombre"], ["Empresa", "Empresa"], ["Teléfono", "Teléfono"], ["Corrugado", "Corrugado"], ["Flauta", "Flauta"],
+      ["Resistencia", "Resistencia"], ["Lámina suajada", "Lámina suajada"], ["Impresión", "Impresión"], ["Otros", "Otros requerimientos"]]
+      .map(([k, key]) => [k, linea(key)]).filter(([, v]) => v).map(([k, v]) => `${k}: ${v.trim()}`);
+    $("cExtra").hidden = !extras.length; $("cExtra").textContent = extras.join("\n");
+    calcular();
+  }
+  $("leer").addEventListener("click", leer);
+  $("pegar").addEventListener("paste", () => setTimeout(leer, 0));
+  $("limpiar").addEventListener("click", () => { ["pegar", "cL", "cA", "cH", "cQ"].forEach(id => $(id).value = ""); $("cExtra").hidden = true; $("cMsg").hidden = true; calcular(); });
+  calcular();
+
+  // ---------- Pedidos ----------
+  const cli = o => perfiles[o.user_id] || {};
+  const activos = ["cotizacion_solicitada", "cotizado", "confirmado", "en_produccion", "en_camino"];
+  function pintarConteos() {
+    const n = k => pedidos.filter(o => o.status === k).length;
+    const btns = [["activos", "Activos", pedidos.filter(o => activos.includes(o.status)).length], ["todos", "Todos", pedidos.length],
+      ...ESTADOS.map(e => [e.key, e.label, n(e.key)])];
+    $("counts").innerHTML = btns.map(([k, l, c]) => `<button data-f="${k}" aria-pressed="${filtro === k}">${esc(l)} · ${c}</button>`).join("");
+    $("counts").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { filtro = b.dataset.f; pintar(); }));
+  }
+  function pintar() {
+    pintarConteos();
+    const q = $("buscar").value.trim().toLowerCase();
+    const lista = pedidos.filter(o => filtro === "todos" || (filtro === "activos" ? activos.includes(o.status) : o.status === filtro))
+      .filter(o => !q || [folio(o.id), cli(o).nombre, cli(o).empresa, cli(o).telefono, cli(o).email].join(" ").toLowerCase().includes(q));
+    if (!lista.length) { $("tbody").innerHTML = `<tr><td colspan="9" class="empty">No hay pedidos aquí.</td></tr>`; return; }
+    $("tbody").innerHTML = lista.map(o => {
+      const c = calculo(o.largo, o.ancho, o.alto, o.cantidad);
+      const ex = [o.req_suaje && "Suaje", o.req_impresion && "Impresión", o.otros && "Otros"].filter(Boolean).join(", ");
+      return `<tr data-id="${o.id}">
+        <td><b>${folio(o.id)}</b></td><td>${fecha(o.created_at)}</td>
+        <td>${esc(cli(o).nombre || cli(o).email || "—")}<br><span class="muted">${esc(cli(o).empresa || "")}</span></td>
+        <td>${o.largo ? `${num(o.largo)}×${num(o.ancho)}×${num(o.alto)}` : "—"}</td>
+        <td>${o.cantidad ? num(o.cantidad) : "—"}</td>
+        <td>${c && c.total != null ? num(c.total) : "—"}</td>
+        <td>${c && c.total != null ? (c.total >= MINIMO_M2 ? "✓" : "✗") : "—"}</td>
+        <td>${ex ? `<span class="badge" style="--c:#9A6534">${esc(ex)}</span>` : "—"}</td>
+        <td>${badge(o.status)}</td></tr>`;
+    }).join("");
+    $("tbody").querySelectorAll("tr[data-id]").forEach(tr => tr.addEventListener("click", () => abrir(+tr.dataset.id)));
+  }
+  $("buscar").addEventListener("input", pintar);
+
+  async function abrir(id) {
+    const o = pedidos.find(p => p.id === id), p = cli(o);
+    const [{ data: nota }, { data: hist }] = await Promise.all([
+      client.from("order_notes").select("notas").eq("order_id", id).maybeSingle(),
+      client.from("order_history").select("status, created_at").eq("order_id", id).order("created_at")
+    ]);
+    const tel = (p.telefono || "").replace(/\D/g, "");
+    const wa = tel ? `https://wa.me/${tel.length === 10 ? "52" + tel : tel}?text=${encodeURIComponent(`Hola ${p.nombre || ""}, te escribimos de Gloria Curiel sobre tu pedido ${folio(o.id)}.`)}` : null;
+    $("dTitulo").innerHTML = `${folio(o.id)} ${badge(o.status)}`;
+    $("dBody").innerHTML = `
+      <div class="grid2">
+        <div>
+          <h3 style="font-size:1rem;margin-bottom:8px">Cliente</h3>
+          <dl class="spec">
+            <dt>Nombre</dt><dd>${esc(p.nombre || "—")}</dd><dt>Empresa</dt><dd>${esc(p.empresa || "—")}</dd>
+            <dt>Teléfono</dt><dd>${esc(p.telefono || "—")} ${wa ? `· <a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ""}</dd>
+            <dt>Correo</dt><dd><a href="mailto:${esc(p.email)}">${esc(p.email || "—")}</a></dd>
+          </dl>
+          <h3 style="font-size:1rem;margin:18px 0 8px">Lámina regular</h3>
+          <dl class="spec">
+            <dt>Medidas</dt><dd>${o.largo ? `${num(o.largo)} × ${num(o.ancho)} × ${num(o.alto)} cm` : "—"}</dd>
+            <dt>Cantidad</dt><dd>${o.cantidad ? num(o.cantidad) : "—"}</dd>
+            <dt>Corrugado / flauta</dt><dd>${esc(o.corrugado || "—")} · ${esc(o.flauta || "—")}</dd>
+            <dt>Resistencia</dt><dd>${esc(o.resistencia || "No indicada")}${o.resistencia_asistente ? `<br><span class="muted">Asistente: ${esc(o.resistencia_asistente)}</span>` : ""}</dd>
+            ${o.producto ? `<dt>Producto</dt><dd>${esc(o.producto)}</dd>` : ""}
+          </dl>
+          <div style="margin-top:12px">${resultadoHTML(o.largo, o.ancho, o.alto, o.cantidad)}</div>
+          <h3 style="font-size:1rem;margin:18px 0 8px">Extras (cotizar aparte)</h3>
+          <dl class="spec">
+            <dt>Lámina suajada</dt><dd>${o.req_suaje ? "Sí" + (o.suaje_largo ? ` · ${num(o.suaje_largo)} × ${num(o.suaje_ancho)} cm` : " · sin medidas") : "No"}</dd>
+            <dt>Impresión</dt><dd>${o.req_impresion ? "Sí" + (o.impresion_det ? " · " + esc(o.impresion_det) : "") : "No"}</dd>
+            <dt>Otros</dt><dd>${esc(o.otros || "Ninguno")}</dd>
+          </dl>
+        </div>
+        <form id="fEdit">
+          <h3 style="font-size:1rem;margin-bottom:8px">Gestionar pedido</h3>
+          <div class="field"><label for="eStatus">Estado</label>
+            <select id="eStatus">${ESTADOS.map(e => `<option value="${e.key}" ${e.key === o.status ? "selected" : ""}>${esc(e.label)}</option>`).join("")}</select></div>
+          <div class="row">
+            <div class="field"><label for="ePrecio">Precio total (MXN)</label><input id="ePrecio" type="number" min="0" step="0.01" value="${o.precio ?? ""}"></div>
+            <div class="field"><label for="eFecha">Entrega estimada</label><input id="eFecha" type="date" value="${o.fecha_entrega ?? ""}"></div>
+          </div>
+          <div class="field"><label for="eMsg">Mensaje para el cliente <span class="muted">(lo ve el cliente)</span></label><textarea id="eMsg">${esc(o.mensaje_cliente || "")}</textarea></div>
+          <div class="field"><label for="eNotas">Notas internas <span class="muted">(solo staff)</span></label><textarea id="eNotas">${esc(nota?.notas || "")}</textarea></div>
+          <button class="btn primary" style="width:100%">Guardar cambios</button>
+          <div class="msg" id="eMsgOut" hidden></div>
+          <h3 style="font-size:1rem;margin:20px 0 8px">Historial</h3>
+          <ul class="timeline">${(hist || []).map((h, i, a) => `<li class="${i === a.length - 1 ? "now" : "done"}">${esc(estado(h.status).label)}<small>${fechaHora(h.created_at)}</small></li>`).join("")}</ul>
+        </form>
+      </div>`;
+    $("fEdit").addEventListener("submit", async e => {
+      e.preventDefault();
+      const cambios = { status: $("eStatus").value, precio: $("ePrecio").value === "" ? null : +$("ePrecio").value,
+        fecha_entrega: $("eFecha").value || null, mensaje_cliente: $("eMsg").value.trim() || null };
+      const [r1, r2] = await Promise.all([
+        client.from("orders").update(cambios).eq("id", id),
+        client.from("order_notes").upsert({ order_id: id, notas: $("eNotas").value.trim() || null, updated_at: new Date().toISOString() })
+      ]);
+      const err = r1.error || r2.error;
+      if (!err) { Object.assign(o, cambios); pintar(); await abrir(id); }
+      const msg = $("eMsgOut");
+      msg.hidden = false; msg.className = "msg " + (err ? "err" : "ok");
+      msg.textContent = err ? "No se pudo guardar: " + err.message : "✓ Cambios guardados.";
+    });
+    if (!$("dlg").open) $("dlg").showModal();
+  }
+  $("dCerrar").addEventListener("click", () => $("dlg").close());
+
+  // ---------- Clientes ----------
+  function pintarClientes() {
+    const q = $("buscarCli").value.trim().toLowerCase();
+    const lista = Object.values(perfiles).filter(p => !q || [p.nombre, p.empresa, p.telefono, p.email].join(" ").toLowerCase().includes(q))
+      .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
+    $("tbodyCli").innerHTML = lista.length ? lista.map(p => `<tr>
+      <td>${esc(p.nombre || "—")}</td><td>${esc(p.empresa || "—")}</td><td>${esc(p.telefono || "—")}</td><td>${esc(p.email)}</td>
+      <td>${pedidos.filter(o => o.user_id === p.id).length}</td><td>${p.role === "staff" ? "Staff" : "Cliente"}</td><td>${fecha(p.created_at)}</td></tr>`).join("")
+      : `<tr><td colspan="7" class="empty">Sin clientes.</td></tr>`;
+  }
+  $("buscarCli").addEventListener("input", pintarClientes);
+
+  async function cargar() {
+    const [rp, ro] = await Promise.all([
+      client.from("profiles").select("*"),
+      client.from("orders").select("*").order("created_at", { ascending: false })
+    ]);
+    if (rp.error || ro.error) { $("tbody").innerHTML = `<tr><td colspan="9" class="msg err">Error: ${esc((rp.error || ro.error).message)}</td></tr>`; return; }
+    perfiles = Object.fromEntries(rp.data.map(p => [p.id, p])); pedidos = ro.data;
+    pintar(); pintarClientes();
+  }
+
+  $("salir").addEventListener("click", async () => { await client.auth.signOut(); location.href = "cuenta.html"; });
+
+  (async () => {
+    if (!GC.configured) {
+      $("noConfig").hidden = false; $("tab-pedidos").hidden = true;
+      document.querySelector('[data-tab="calc"]').click(); return;
+    }
+    const { user, profile } = await GC.sesion();
+    if (!user || profile?.role !== "staff") {
+      $("noAcceso").hidden = false; $("tabs").hidden = true; $("tab-pedidos").hidden = true; return;
+    }
+    $("who").textContent = user.email; $("salir").hidden = false;
+    cargar();
+    // Actualizar en vivo cuando llegan pedidos nuevos
+    client.channel("orders").on("postgres_changes", { event: "*", schema: "public", table: "orders" }, cargar).subscribe();
+  })();
+</script>
+</body>
+</html>

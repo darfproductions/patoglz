@@ -15,9 +15,26 @@ Al final de `index.html`, en la sección `CONFIGURACIÓN DEL NEGOCIO`:
 - **Vercel**: importar este repositorio en vercel.com → Deploy.
 - **GitHub Pages**: Settings → Pages → rama principal, carpeta raíz.
 
-## Calculadora interna (`calculadora.html`)
-Página privada para el negocio (no está enlazada desde la página ni se indexa en Google).
-Pega el mensaje de cotización del cliente y muestra la medida de lámina regular, m² por caja,
-m² totales y si cumple el pedido mínimo. Al cliente solo se le muestra si cumple el mínimo.
+## Archivos
+| Archivo | Para qué |
+|---|---|
+| `index.html` | Página pública con cotizador y asistente de resistencia |
+| `cuenta.html` | Inicio de sesión / registro de clientes y **Mis pedidos** (estado e historial) |
+| `panel.html` | **Panel staff**: pedidos, cambio de estado, precio, entrega, notas internas, clientes y calculadora de lámina |
+| `assets/config.js` | URL y llave pública de Supabase |
+| `assets/app.js`, `assets/app.css` | Código y estilos compartidos de cuenta y panel |
+| `supabase/schema.sql` | Base de datos: tablas, reglas de seguridad (RLS) y staff |
 
-Si cambias la fórmula o el mínimo, actualízalos en **ambos** archivos (`index.html` y `calculadora.html`).
+## Conectar el inicio de sesión (Supabase)
+1. Crea un proyecto en supabase.com (plan gratuito).
+2. En **SQL Editor** pega y ejecuta todo `supabase/schema.sql`.
+3. En **Project Settings → API** copia la *Project URL* y la *publishable/anon key* en `assets/config.js`.
+4. En **Authentication → URL Configuration** pon la dirección de la página publicada.
+5. Los correos de `staff_emails` (pgonzalezcastro1@gmail.com y jlcastro48@yahoo.com) quedan como **staff** al crear su cuenta en `cuenta.html`.
+   Para agregar otro: `insert into staff_emails values ('correo@ejemplo.com');` (antes de que se registre)
+   o `update profiles set role = 'staff' where email = 'correo@ejemplo.com';`
+
+Estados de pedido: Cotización solicitada → Cotizado → Confirmado → En producción → En camino → Entregado (o Cancelado).
+El cliente solo ve sus pedidos, sin notas internas ni m²; puede cancelar mientras esté en cotización.
+
+Si cambias la fórmula de lámina o el mínimo, actualízalos en `index.html` y `assets/app.js`.
