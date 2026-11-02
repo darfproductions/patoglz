@@ -461,7 +461,7 @@
       <h2 class="section-title">Cotiza tus cajas en minutos</h2>
       <p class="section-lead">Llena los datos y envíanos tu solicitud por WhatsApp o correo. Te respondemos con tu cotización lo antes posible.</p>
       <ul>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span>Calculamos por ti cuántos m² de cartón equivale tu pedido.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span>Te decimos al instante si tu pedido cumple con el mínimo.</span></li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span>Pedido mínimo: 400 m² de cartón.</span></li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span>Entrega en CDMX y Estado de México en 10 a 15 días.</span></li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span>¿No sabes las medidas? Mándanos una foto de tu producto y te ayudamos.</span></li>
@@ -495,7 +495,7 @@
           <input id="resistencia" name="resistencia" placeholder="Ej. 32 ECT">
         </div>
       </div>
-      <div class="calc" id="calc" aria-live="polite">Escribe las medidas y la cantidad para estimar los m² de cartón de tu pedido.</div>
+      <div class="calc" id="calc" aria-live="polite">Escribe las medidas y la cantidad para revisar si tu pedido cumple con el mínimo.</div>
 
       <div class="extras">
         <h3 class="form-sub">¿Requieres algo más? <span>Se cotiza aparte</span></h3>
@@ -523,7 +523,7 @@
         </button>
         <button type="submit" class="btn btn-ghost" data-via="mail">Enviar por correo</button>
       </div>
-      <p class="form-note">* Campos obligatorios. Los m² son una estimación de lámina regular; la lámina suajada, la impresión y otros extras se cotizan aparte.</p>
+      <p class="form-note">* Campos obligatorios. La lámina suajada, la impresión y otros extras se cotizan aparte.</p>
     </form>
   </div>
 </section>
@@ -643,39 +643,31 @@
   }, { threshold: .12 }) : null;
   document.querySelectorAll(".reveal").forEach(el => io ? io.observe(el) : el.classList.add("in"));
 
-  // ====== FÓRMULA DE LÁMINA REGULAR (en cm) ======
-  // L = largo, A = ancho, H = alto (medidas interiores). 4 cm de ceja de pegue.
-  const FORMULA_TEXTO = "(2L + 2A + 4) × (A + H)";
   const laminaRegular = (L, A, H) => [2 * L + 2 * A + 4, A + H];
 
   // Calculadora de m²
   const $ = id => document.getElementById(id);
   const fmt = n => n.toLocaleString("es-MX", { maximumFractionDigits: n < 10 ? 2 : 0 });
-  let ultimoDetalle = null;
+  // Al cliente solo se le indica si cumple el pedido mínimo.
   function actualizarCalc() {
     const calc = $("calc"), qty = +$("cantidad").value;
     const L = +$("largo").value, A = +$("ancho").value, H = +$("alto").value;
     calc.className = "calc";
-    ultimoDetalle = null;
-    if (!(L > 0 && A > 0 && H > 0)) { calc.textContent = "Escribe las medidas y la cantidad para estimar los m² de cartón de tu pedido."; return ""; }
+    if (!(L > 0 && A > 0 && H > 0)) { calc.textContent = "Escribe las medidas y la cantidad para revisar si tu pedido cumple con el mínimo."; return null; }
     const [lL, lA] = laminaRegular(L, A, H);
-    const m2 = (lL * lA) / 10000;
-    ultimoDetalle = `Lámina regular: ${fmt(lL)} × ${fmt(lA)} cm (${fmt(m2)} m² por caja)`;
-    const nota = `<small>Lámina regular de ${fmt(lL)} × ${fmt(lA)} cm · Fórmula: ${FORMULA_TEXTO}</small>`;
-    const minCajas = Math.ceil(MINIMO_M2 / m2);
+    const minCajas = Math.ceil(MINIMO_M2 / ((lL * lA) / 10000));
     if (!(qty > 0)) {
-      calc.innerHTML = `Cada caja usa aprox. <b>${fmt(m2)} m²</b> de cartón. El mínimo de ${MINIMO_M2} m² equivale a unas <b>${fmt(minCajas)} cajas</b> de esta medida.${nota}`;
-      return `${fmt(m2)} m² por caja`;
+      calc.innerHTML = `Para esta medida, el pedido mínimo es de <b>${fmt(minCajas)} cajas</b>.`;
+      return null;
     }
-    const total = m2 * qty;
-    if (total >= MINIMO_M2) {
+    if (qty >= minCajas) {
       calc.classList.add("ok");
-      calc.innerHTML = `Tu pedido equivale a aprox. <b>${fmt(total)} m²</b> de cartón. Cumple con el pedido mínimo.${nota}`;
-    } else {
-      calc.classList.add("warn");
-      calc.innerHTML = `Tu pedido equivale a aprox. <b>${fmt(total)} m²</b>. El mínimo es ${MINIMO_M2} m², que en esta medida son unas <b>${fmt(minCajas)} cajas</b>.${nota}`;
+      calc.innerHTML = `<b>✓ Tu pedido cumple con el pedido mínimo.</b>`;
+      return true;
     }
-    return `${fmt(total)} m² aprox.`;
+    calc.classList.add("warn");
+    calc.innerHTML = `Tu pedido no alcanza el mínimo. Para esta medida necesitas al menos <b>${fmt(minCajas)} cajas</b>.`;
+    return false;
   }
   // Flautas disponibles según el tipo de corrugado
   const FLAUTAS = { Sencillo: ["C", "B", "E"], Doble: ["BC"] };
@@ -701,7 +693,7 @@
 
     const v = id => $(id).value.trim();
     const medidas = (v("largo") && v("ancho") && v("alto")) ? `${v("largo")} × ${v("ancho")} × ${v("alto")} cm` : "Por definir";
-    const estimado = actualizarCalc();
+    const cumple = actualizarCalc();
     const suaje = $("reqSuaje").checked, impresion = $("reqImpresion").checked, otros = v("otros");
     const medSuaje = (v("lamLargo") && v("lamAncho")) ? `${v("lamLargo")} × ${v("lamAncho")} cm` : "medidas no indicadas";
     const lineas = [
@@ -715,8 +707,7 @@
       "*COTIZACIÓN LÁMINA REGULAR*",
       `Medidas interiores (L × A × H): ${medidas}`,
       `Cantidad: ${v("cantidad") || "Por definir"}`,
-      ultimoDetalle,
-      estimado ? `Cartón total estimado: ${estimado}` : null,
+      cumple === null ? null : `Cumple pedido mínimo: ${cumple ? "Sí" : "No"}`,
       `Corrugado: ${v("corrugado")}`,
       `Flauta: ${v("flauta")}`,
       `Resistencia: ${v("resistencia") || "No indicada"}`,
