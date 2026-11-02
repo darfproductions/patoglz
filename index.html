@@ -445,7 +445,7 @@
       <div style="margin-top:28px"><a href="#cotizar" class="btn btn-primary">Cotizar mis cajas</a></div>
     </div>
     <div class="why-list">
-      <div class="why-item reveal"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg><h3>Resistencia garantizada</h3><p>Sencillo o doble corrugado, según el peso y la estiba de tu producto.</p></div>
+      <div class="why-item reveal"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg><h3>El cartón correcto</h3><p>Corrugado sencillo o doble, la flauta y la resistencia que tu producto necesita.</p></div>
       <div class="why-item reveal"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 15.3 15.3 21.3a1 1 0 0 1-1.4 0L2.7 10.1a1 1 0 0 1 0-1.4L8.7 2.7a1 1 0 0 1 1.4 0l11.2 11.2a1 1 0 0 1 0 1.4Z"/><path d="m7.5 10.5 2-2M10.5 13.5l2-2M13.5 16.5l2-2"/></svg><h3>Medidas a tu gusto</h3><p>Cajas hechas con las dimensiones exactas que necesitas.</p></div>
       <div class="why-item reveal"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><h3>Tiempos claros</h3><p>Entrega de 10 a 15 días. Sabes desde el inicio cuándo llega tu pedido.</p></div>
       <div class="why-item reveal"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg><h3>Atención directa</h3><p>Hablas con nosotros por WhatsApp, sin conmutadores ni esperas.</p></div>
@@ -484,8 +484,16 @@
         <div class="field"><input id="ancho" name="ancho" type="number" min="1" inputmode="decimal" placeholder="Ancho" aria-label="Ancho en centímetros"></div>
         <div class="field"><input id="alto" name="alto" type="number" min="1" inputmode="decimal" placeholder="Alto" aria-label="Alto en centímetros"></div>
       </div>
-      <div class="field"><label for="corrugado">Resistencia</label>
-        <select id="corrugado" name="corrugado"><option>Sencillo corrugado</option><option>Doble corrugado</option><option>No sé, necesito asesoría</option></select>
+      <div class="form-row three">
+        <div class="field"><label for="corrugado">Tipo de corrugado</label>
+          <select id="corrugado" name="corrugado"><option value="Sencillo">Sencillo</option><option value="Doble">Doble</option></select>
+        </div>
+        <div class="field"><label for="flauta">Flauta</label>
+          <select id="flauta" name="flauta"></select>
+        </div>
+        <div class="field"><label for="resistencia">Resistencia</label>
+          <input id="resistencia" name="resistencia" placeholder="Ej. 32 ECT">
+        </div>
       </div>
       <div class="calc" id="calc" aria-live="polite">Escribe las medidas y la cantidad para estimar los m² de cartón de tu pedido.</div>
 
@@ -669,6 +677,14 @@
     }
     return `${fmt(total)} m² aprox.`;
   }
+  // Flautas disponibles según el tipo de corrugado
+  const FLAUTAS = { Sencillo: ["C", "B", "E"], Doble: ["BC"] };
+  function actualizarFlautas() {
+    $("flauta").innerHTML = FLAUTAS[$("corrugado").value].map(f => `<option value="${f}">Flauta ${f}</option>`).join("");
+  }
+  $("corrugado").addEventListener("change", actualizarFlautas);
+  actualizarFlautas();
+
   ["largo", "ancho", "alto", "cantidad"].forEach(id => $(id).addEventListener("input", actualizarCalc));
   $("reqSuaje").addEventListener("change", e => $("suajeFields").hidden = !e.target.checked);
   $("reqImpresion").addEventListener("change", e => $("impresionFields").hidden = !e.target.checked);
@@ -701,7 +717,9 @@
       `Cantidad: ${v("cantidad") || "Por definir"}`,
       ultimoDetalle,
       estimado ? `Cartón total estimado: ${estimado}` : null,
-      `Resistencia: ${v("corrugado")}`,
+      `Corrugado: ${v("corrugado")}`,
+      `Flauta: ${v("flauta")}`,
+      `Resistencia: ${v("resistencia") || "No indicada"}`,
       "",
       "*EXTRAS (COTIZAR APARTE)*",
       `Lámina suajada: ${suaje ? "SÍ, " + medSuaje : "No"}`,
