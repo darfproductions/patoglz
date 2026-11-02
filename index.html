@@ -144,15 +144,13 @@
   input,select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:.98rem;background:#FFFCF8;color:var(--ink);transition:border .15s}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--kraft)}
   textarea{resize:vertical;min-height:80px}
-  .estilo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;border:0}
-  .estilo legend{font-size:.85rem;font-weight:600;margin-bottom:6px;color:var(--ink-soft)}
-  .estilo label{margin:0;cursor:pointer;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;background:#FFFCF8;display:flex;gap:10px;align-items:flex-start;color:var(--ink);font-weight:500;transition:border .15s,background .15s}
-  .estilo label b{display:block;font-size:.98rem}
-  .estilo label small{display:block;font-weight:400;color:var(--ink-soft);font-size:.8rem;line-height:1.35}
-  .estilo input{width:auto;margin-top:4px;accent-color:var(--kraft-dark)}
-  .estilo label:has(input:checked){border-color:var(--kraft);background:#F6EBDB}
-  .suaje-extra{border:1.5px dashed var(--kraft-light);border-radius:12px;padding:14px 14px 0;margin-bottom:16px}
-  .suaje-extra p{font-size:.82rem;color:var(--ink-soft);margin:-2px 0 10px}
+  .form-sub{font-family:Montserrat,sans-serif;font-size:1rem;margin:4px 0 12px;display:flex;align-items:center;gap:8px}
+  .form-sub span{font-family:Inter,sans-serif;font-size:.72rem;font-weight:600;background:#F6EBDB;color:var(--kraft-dark);padding:3px 9px;border-radius:999px}
+  .extras{border:1.5px dashed var(--kraft-light);border-radius:14px;padding:16px 16px 4px;margin-bottom:18px}
+  .extras > p{font-size:.84rem;color:var(--ink-soft);margin:-4px 0 12px}
+  .check{display:flex;gap:10px;align-items:center;cursor:pointer;font-weight:600;color:var(--ink);font-size:.95rem;margin-bottom:12px}
+  .check input{width:18px;height:18px;accent-color:var(--kraft-dark);flex:none}
+  .sub-fields{padding-left:28px}
   .calc small{display:block;margin-top:6px;font-size:.78rem;opacity:.85}
   .calc{background:#F6EBDB;border-radius:12px;padding:14px 16px;margin-bottom:18px;font-size:.92rem;color:var(--ink-soft)}
   .calc b{color:var(--ink)}
@@ -479,29 +477,36 @@
         <div class="field"><label for="tel">Teléfono / WhatsApp *</label><input id="tel" name="tel" type="tel" required autocomplete="tel" placeholder="55 0000 0000"></div>
         <div class="field"><label for="cantidad">Cantidad de cajas</label><input id="cantidad" name="cantidad" type="number" min="1" inputmode="numeric" placeholder="Ej. 1000"></div>
       </div>
-      <fieldset class="estilo">
-        <legend>Tipo de caja *</legend>
-        <label><input type="radio" name="estilo" value="regular" checked><span><b>Caja regular</b><small>Con solapas arriba y abajo, se cierra con cinta.</small></span></label>
-        <label><input type="radio" name="estilo" value="suajada"><span><b>Caja suajada</b><small>Troquelada, autoarmable o con forma especial.</small></span></label>
-      </fieldset>
+      <h3 class="form-sub">Cotización de lámina regular <span>Cálculo automático</span></h3>
       <label>Medidas interiores de la caja (cm)</label>
       <div class="form-row three">
         <div class="field"><input id="largo" name="largo" type="number" min="1" inputmode="decimal" placeholder="Largo" aria-label="Largo en centímetros"></div>
         <div class="field"><input id="ancho" name="ancho" type="number" min="1" inputmode="decimal" placeholder="Ancho" aria-label="Ancho en centímetros"></div>
         <div class="field"><input id="alto" name="alto" type="number" min="1" inputmode="decimal" placeholder="Alto" aria-label="Alto en centímetros"></div>
       </div>
-      <div class="suaje-extra" id="suajeExtra" hidden>
-        <label>Medida de la lámina extendida (cm), si la conoces</label>
-        <p>Si ya tienes el plano o el suaje, escribe el tamaño de la lámina antes de armar. Si no, lo estimamos con las medidas interiores.</p>
-        <div class="form-row">
-          <div class="field"><input id="lamLargo" type="number" min="1" inputmode="decimal" placeholder="Largo de lámina" aria-label="Largo de lámina en centímetros"></div>
-          <div class="field"><input id="lamAncho" type="number" min="1" inputmode="decimal" placeholder="Ancho de lámina" aria-label="Ancho de lámina en centímetros"></div>
-        </div>
-      </div>
       <div class="field"><label for="corrugado">Resistencia</label>
         <select id="corrugado" name="corrugado"><option>Sencillo corrugado</option><option>Doble corrugado</option><option>No sé, necesito asesoría</option></select>
       </div>
       <div class="calc" id="calc" aria-live="polite">Escribe las medidas y la cantidad para estimar los m² de cartón de tu pedido.</div>
+
+      <div class="extras">
+        <h3 class="form-sub">¿Requieres algo más? <span>Se cotiza aparte</span></h3>
+        <p>Marca lo que necesites y te enviamos la cotización de estos extras por separado.</p>
+        <label class="check"><input type="checkbox" id="reqSuaje"> Requiero lámina suajada</label>
+        <div class="sub-fields" id="suajeFields" hidden>
+          <label>Medida de la lámina suajada (cm)</label>
+          <div class="form-row">
+            <div class="field"><input id="lamLargo" type="number" min="1" inputmode="decimal" placeholder="Largo" aria-label="Largo de lámina suajada en centímetros"></div>
+            <div class="field"><input id="lamAncho" type="number" min="1" inputmode="decimal" placeholder="Ancho" aria-label="Ancho de lámina suajada en centímetros"></div>
+          </div>
+        </div>
+        <label class="check"><input type="checkbox" id="reqImpresion"> Requiero impresión</label>
+        <div class="sub-fields field" id="impresionFields" hidden>
+          <textarea id="impresionDet" placeholder="Ej. logo a 1 tinta en 2 caras, color negro" aria-label="Detalles de impresión"></textarea>
+        </div>
+        <div class="field"><label for="otros">Otros requerimientos</label><textarea id="otros" placeholder="Ej. separadores, asas, cinta, entrega urgente…"></textarea></div>
+      </div>
+
       <div class="field"><label for="producto">¿Qué vas a empacar?</label><textarea id="producto" name="producto" placeholder="Ej. botellas de vidrio de 1 L, 12 por caja, peso aprox. 15 kg"></textarea></div>
       <div class="form-actions">
         <button type="submit" class="btn btn-wa" data-via="wa">
@@ -510,7 +515,7 @@
         </button>
         <button type="submit" class="btn btn-ghost" data-via="mail">Enviar por correo</button>
       </div>
-      <p class="form-note">* Campos obligatorios. Los m² son una estimación según el tipo de caja; la cotización final la confirmamos contigo.</p>
+      <p class="form-note">* Campos obligatorios. Los m² son una estimación de lámina regular; la lámina suajada, la impresión y otros extras se cotizan aparte.</p>
     </form>
   </div>
 </section>
@@ -527,7 +532,7 @@
       <details class="reveal"><summary>¿Cuánto tarda en llegar mi pedido?</summary><p>El tiempo de entrega es de 10 a 15 días a partir de que confirmas tu pedido.</p></details>
       <details class="reveal"><summary>¿A qué zonas entregan?</summary><p>Entregamos en la Ciudad de México y el Estado de México. Si estás en otra zona, escríbenos y lo revisamos.</p></details>
       <details class="reveal"><summary>¿Qué diferencia hay entre sencillo y doble corrugado?</summary><p>El sencillo corrugado tiene una capa ondulada y funciona para la mayoría de los productos ligeros y medianos. El doble corrugado tiene dos capas, es más rígido y resiste más peso y estiba. Es ideal para producto pesado o para exportación.</p></details>
-      <details class="reveal"><summary>¿Qué diferencia hay entre caja regular y caja suajada?</summary><p>La caja regular tiene cuatro solapas arriba y abajo y se cierra con cinta; es la más económica para envío y almacenaje. La caja suajada se corta con un suaje (troquel) a una forma especial: puede ser autoarmable, llevar pestañas, ventanas o asas. Como la lámina se aprovecha distinto, cada una se cotiza con su propia fórmula.</p></details>
+      <details class="reveal"><summary>¿Qué diferencia hay entre caja regular y caja suajada?</summary><p>La caja regular tiene cuatro solapas arriba y abajo y se cierra con cinta; es la más económica para envío y almacenaje. La caja suajada se corta con un suaje (troquel) a una forma especial: puede ser autoarmable, llevar pestañas, ventanas o asas. En el cotizador calculamos la lámina regular; si necesitas lámina suajada, márcalo con sus medidas y te la cotizamos aparte.</p></details>
       <details class="reveal"><summary>No sé qué medidas necesito, ¿me pueden ayudar?</summary><p>Claro. Mándanos por WhatsApp una foto de tu producto, sus medidas aproximadas, el peso y cuántas piezas quieres por caja, y te recomendamos la caja ideal.</p></details>
       <details class="reveal"><summary>¿Cómo mido mi caja?</summary><p>Se miden las medidas interiores en este orden: largo (el lado más grande de la base), ancho (el lado más corto de la base) y alto. Todas en centímetros.</p></details>
     </div>
@@ -630,45 +635,25 @@
   }, { threshold: .12 }) : null;
   document.querySelectorAll(".reveal").forEach(el => io ? io.observe(el) : el.classList.add("in"));
 
-  // ====== FÓRMULAS DE LÁMINA (en cm) ======
-  // L = largo, A = ancho, H = alto (medidas interiores)
-  // Ajusta estas fórmulas a las que usa tu proveedor.
-  const FORMULAS = {
-    regular: {
-      nombre: "Caja regular",
-      texto: "(2L + 2A + 4) × (A + H)",
-      lamina: (L, A, H) => [2 * L + 2 * A + 4, A + H]          // 4 cm de ceja de pegue
-    },
-    suajada: {
-      nombre: "Caja suajada",
-      texto: "(L + 4H + 4) × (2A + 4H + 2)",
-      lamina: (L, A, H) => [L + 4 * H + 4, 2 * A + 4 * H + 2]  // estimación tipo caja de envío autoarmable
-    }
-  };
+  // ====== FÓRMULA DE LÁMINA REGULAR (en cm) ======
+  // L = largo, A = ancho, H = alto (medidas interiores). 4 cm de ceja de pegue.
+  const FORMULA_TEXTO = "(2L + 2A + 4) × (A + H)";
+  const laminaRegular = (L, A, H) => [2 * L + 2 * A + 4, A + H];
 
   // Calculadora de m²
   const $ = id => document.getElementById(id);
   const fmt = n => n.toLocaleString("es-MX", { maximumFractionDigits: n < 10 ? 2 : 0 });
-  const estilo = () => document.querySelector('input[name="estilo"]:checked').value;
-  function calcularLamina() {
-    const f = FORMULAS[estilo()];
-    if (estilo() === "suajada") {
-      const lL = +$("lamLargo").value, lA = +$("lamAncho").value;
-      if (lL > 0 && lA > 0) return { dims: [lL, lA], origen: "Medida de lámina indicada por el cliente" };
-    }
-    const L = +$("largo").value, A = +$("ancho").value, H = +$("alto").value;
-    if (!(L > 0 && A > 0 && H > 0)) return null;
-    return { dims: f.lamina(L, A, H), origen: `Fórmula ${f.nombre.toLowerCase()}: ${f.texto}` };
-  }
   let ultimoDetalle = null;
   function actualizarCalc() {
-    const calc = $("calc"), lam = calcularLamina(), qty = +$("cantidad").value;
+    const calc = $("calc"), qty = +$("cantidad").value;
+    const L = +$("largo").value, A = +$("ancho").value, H = +$("alto").value;
     calc.className = "calc";
     ultimoDetalle = null;
-    if (!lam) { calc.textContent = "Escribe las medidas y la cantidad para estimar los m² de cartón de tu pedido."; return ""; }
-    const m2 = (lam.dims[0] * lam.dims[1]) / 10000;
-    ultimoDetalle = `Lámina: ${fmt(lam.dims[0])} × ${fmt(lam.dims[1])} cm (${fmt(m2)} m² por caja)`;
-    const nota = `<small>${FORMULAS[estilo()].nombre} · lámina de ${fmt(lam.dims[0])} × ${fmt(lam.dims[1])} cm · ${lam.origen}</small>`;
+    if (!(L > 0 && A > 0 && H > 0)) { calc.textContent = "Escribe las medidas y la cantidad para estimar los m² de cartón de tu pedido."; return ""; }
+    const [lL, lA] = laminaRegular(L, A, H);
+    const m2 = (lL * lA) / 10000;
+    ultimoDetalle = `Lámina regular: ${fmt(lL)} × ${fmt(lA)} cm (${fmt(m2)} m² por caja)`;
+    const nota = `<small>Lámina regular de ${fmt(lL)} × ${fmt(lA)} cm · Fórmula: ${FORMULA_TEXTO}</small>`;
     const minCajas = Math.ceil(MINIMO_M2 / m2);
     if (!(qty > 0)) {
       calc.innerHTML = `Cada caja usa aprox. <b>${fmt(m2)} m²</b> de cartón. El mínimo de ${MINIMO_M2} m² equivale a unas <b>${fmt(minCajas)} cajas</b> de esta medida.${nota}`;
@@ -684,11 +669,9 @@
     }
     return `${fmt(total)} m² aprox.`;
   }
-  ["largo", "ancho", "alto", "cantidad", "lamLargo", "lamAncho"].forEach(id => $(id).addEventListener("input", actualizarCalc));
-  document.querySelectorAll('input[name="estilo"]').forEach(r => r.addEventListener("change", () => {
-    $("suajeExtra").hidden = estilo() !== "suajada";
-    actualizarCalc();
-  }));
+  ["largo", "ancho", "alto", "cantidad"].forEach(id => $(id).addEventListener("input", actualizarCalc));
+  $("reqSuaje").addEventListener("change", e => $("suajeFields").hidden = !e.target.checked);
+  $("reqImpresion").addEventListener("change", e => $("impresionFields").hidden = !e.target.checked);
 
   // Envío del formulario
   let via = "wa";
@@ -703,19 +686,28 @@
     const v = id => $(id).value.trim();
     const medidas = (v("largo") && v("ancho") && v("alto")) ? `${v("largo")} × ${v("ancho")} × ${v("alto")} cm` : "Por definir";
     const estimado = actualizarCalc();
+    const suaje = $("reqSuaje").checked, impresion = $("reqImpresion").checked, otros = v("otros");
+    const medSuaje = (v("lamLargo") && v("lamAncho")) ? `${v("lamLargo")} × ${v("lamAncho")} cm` : "medidas no indicadas";
     const lineas = [
       "Hola, quiero cotizar cajas de cartón corrugado.",
       "",
       `Nombre: ${v("nombre")}`,
       v("empresa") ? `Empresa: ${v("empresa")}` : null,
       `Teléfono: ${v("tel")}`,
-      `Tipo de caja: ${FORMULAS[estilo()].nombre}`,
-      `Medidas (L × A × H): ${medidas}`,
+      v("producto") ? `Producto a empacar: ${v("producto")}` : null,
+      "",
+      "*COTIZACIÓN LÁMINA REGULAR*",
+      `Medidas interiores (L × A × H): ${medidas}`,
       `Cantidad: ${v("cantidad") || "Por definir"}`,
       ultimoDetalle,
       estimado ? `Cartón total estimado: ${estimado}` : null,
       `Resistencia: ${v("corrugado")}`,
-      v("producto") ? `Producto: ${v("producto")}` : null
+      "",
+      "*EXTRAS (COTIZAR APARTE)*",
+      `Lámina suajada: ${suaje ? "SÍ, " + medSuaje : "No"}`,
+      `Impresión: ${impresion ? "SÍ" + (v("impresionDet") ? ", " + v("impresionDet") : "") : "No"}`,
+      `Otros requerimientos: ${otros || "Ninguno"}`,
+      (suaje || impresion || otros) ? "\n>> Requiere cotización adicional." : null
     ].filter(x => x !== null);
     const msg = lineas.join("\n");
 
