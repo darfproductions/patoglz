@@ -38,3 +38,12 @@ Estados de pedido: Cotización solicitada → Cotizado → Confirmado → En pro
 El cliente solo ve sus pedidos, sin notas internas ni m²; puede cancelar mientras esté en cotización.
 
 Si cambias la fórmula de lámina o el mínimo, actualízalos en `index.html` y `assets/app.js`.
+
+---
+
+# Página de fotografía (`fotografia/`)
+Página de una sola página para promocionar un negocio de fotografía. Abre `fotografia/index.html` en el navegador.
+
+- **Datos del negocio, servicios, portafolio y paquetes**: edítalos en el bloque `CONFIGURACIÓN DEL NEGOCIO` al final de `fotografia/index.html`.
+- **Fotos**: ponlas en `fotografia/fotos/` con los nombres que indica la configuración. Mientras falte una foto, en su lugar se ve un recuadro de color.
+- El formulario de contacto arma el mensaje y lo abre en WhatsApp o en el correo. No necesita servidor.

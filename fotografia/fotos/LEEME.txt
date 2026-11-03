@@ -1,0 +1,2 @@
+Pon aquí tus fotos (JPG o WEBP, idealmente de menos de 400 KB cada una).
+Los nombres deben coincidir con los de la sección FOTOS / SERVICIOS / PORTAFOLIO en index.html.
