@@ -1,0 +1,12 @@
+{
+  "name": "gloria-curiel-e2e",
+  "private": true,
+  "description": "Final destination check: recorre los 4 flujos con Playwright y un Supabase simulado.",
+  "scripts": {
+    "flows": "node flows.js ../.. result.json shots",
+    "diff": "node diff.js baseline.json result.json"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

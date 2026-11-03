@@ -1,0 +1,229 @@
+{
+  "errors": [],
+  "flows": {
+    "minimo": [
+      {
+        "in": [
+          30,
+          20,
+          15,
+          ""
+        ],
+        "nums": "1,099",
+        "state": "info"
+      },
+      {
+        "in": [
+          30,
+          20,
+          15,
+          500
+        ],
+        "nums": "1,099",
+        "state": "warn"
+      },
+      {
+        "in": [
+          30,
+          20,
+          15,
+          5000
+        ],
+        "nums": "",
+        "state": "ok"
+      },
+      {
+        "in": [
+          40,
+          30,
+          30,
+          900
+        ],
+        "nums": "",
+        "state": "ok"
+      },
+      {
+        "in": [
+          12.5,
+          10,
+          8,
+          20000
+        ],
+        "nums": "",
+        "state": "ok"
+      },
+      {
+        "in": [
+          60,
+          40,
+          40,
+          ""
+        ],
+        "nums": "246",
+        "state": "info"
+      }
+    ],
+    "asistente": [
+      {
+        "in": [
+          5,
+          3,
+          false,
+          false,
+          "Sencillo"
+        ],
+        "text": "Te recomendamos: Corrugado sencillo · Flauta C · 26 ECT La caja de abajo debe aguantar aprox. 30 kg (incluye margen de seguridad)."
+      },
+      {
+        "in": [
+          12,
+          5,
+          true,
+          false,
+          "Sencillo"
+        ],
+        "text": "Te recomendamos: Corrugado sencillo · Flauta C · 26 ECT La caja de abajo debe aguantar aprox. 202 kg (incluye margen de seguridad)."
+      },
+      {
+        "in": [
+          20,
+          6,
+          true,
+          true,
+          "Doble"
+        ],
+        "text": "Te recomendamos: Corrugado doble · Flauta BC · 61 ECT La caja de abajo debe aguantar aprox. 525 kg (incluye margen de seguridad)."
+      },
+      {
+        "in": [
+          80,
+          10,
+          true,
+          true,
+          "Sencillo"
+        ],
+        "text": "Por el peso y la estiba, tu producto necesita un empaque especial. Escríbenos y te asesoramos."
+      },
+      {
+        "in": [
+          8,
+          1,
+          false,
+          true,
+          "Sencillo"
+        ],
+        "text": "Te recomendamos: Corrugado sencillo · Flauta C · 26 ECT La caja de abajo debe aguantar aprox. 30 kg (incluye margen de seguridad)."
+      }
+    ],
+    "validacion": {
+      "focused": "nombre",
+      "sent": 0
+    },
+    "cotizarCampos": {
+      "corrugado": "Sencillo",
+      "flauta": "C",
+      "resistencia": "26 ECT"
+    },
+    "cotizarWA": [
+      "https://wa.me/525513326185?text=Hola, quiero cotizar cajas de cartón corrugado.\n\nNombre: Ana Prueba\nEmpresa: Empaques Demo\nTeléfono: 5512345678\nProducto a empacar: botellas 1 L\n\n*COTIZACIÓN LÁMINA REGULAR*\nMedidas interiores (L × A × H): 40 × 30 × 25 cm\nCantidad: 2500\nCumple pedido mínimo: Sí\nCorrugado: Sencillo\nFlauta: C\nResistencia: 26 ECT\n(Resistencia calculada con el asistente: 12 kg por caja, 5 cajas apiladas, humedad/refrigeración)\n\n*EXTRAS (COTIZAR APARTE)*\nLámina suajada: SÍ, 120 × 80 cm\nImpresión: SÍ, logo 1 tinta\nOtros requerimientos: separadores\n\n>> Requiere cotización adicional."
+    ],
+    "cotizarMail": "mailto:pgonzalezcastro1@gmail.com,jlcastro48@yahoo.com?subject=Cotización de cajas - Empaques Demo&body=Hola, quiero cotizar cajas de cartón corrugado.\n\nNombre: Ana Prueba\nEmpresa: Empaques Demo\nTeléfono: 5512345678\nProducto a empacar: botellas 1 L\n\n*COTIZACIÓN LÁMINA REGULAR*\nMedidas interiores (L × A × H): 40 × 30 × 25 cm\nCantidad: 2500\nCumple pedido mínimo: Sí\nCorrugado: Sencillo\nFlauta: C\nResistencia: 26 ECT\n(Resistencia calculada con el asistente: 12 kg por caja, 5 cajas apiladas, humedad/refrigeración)\n\n*EXTRAS (COTIZAR APARTE)*\nLámina suajada: SÍ, 120 × 80 cm\nImpresión: SÍ, logo 1 tinta\nOtros requerimientos: separadores\n\n>> Requiere cotización adicional.",
+    "registroPrefill": [
+      "Ana Prueba",
+      "Empaques Demo",
+      "5512345678"
+    ],
+    "borradorRecuperado": {
+      "aviso": "¡Listo, Ana Prueba! Recuperamos tu cotización. Revísala y da clic en enviar.",
+      "resistencia": "26 ECT",
+      "cantidad": "2500"
+    },
+    "linkCuenta": "Mis pedidos",
+    "cotizarConCuentaWA": [
+      "https://wa.me/525513326185?text=Hola, quiero cotizar cajas de cartón corrugado.\n\nFolio: GC-00001\nNombre: Ana Prueba\nEmpresa: Empaques Demo\nTeléfono: 5512345678\nProducto a empacar: botellas 1 L\n\n*COTIZACIÓN LÁMINA REGULAR*\nMedidas interiores (L × A × H): 40 × 30 × 25 cm\nCantidad: 2500\nCumple pedido mínimo: Sí\nCorrugado: Sencillo\nFlauta: C\nResistencia: 26 ECT\n(Resistencia calculada con el asistente: 12 kg por caja, 5 cajas apiladas, humedad/refrigeración)\n\n*EXTRAS (COTIZAR APARTE)*\nLámina suajada: SÍ, 120 × 80 cm\nImpresión: SÍ, logo 1 tinta\nOtros requerimientos: separadores\n\n>> Requiere cotización adicional."
+    ],
+    "folioAviso": "Tu cotización se guardó con el folio GC-00001. Puedes ver su estado en Mi cuenta.",
+    "misPedidos": {
+      "hola": "Hola, Ana Prueba",
+      "lista": "GC-00001 Cotización solicitada 40 × 30 × 25 cm · 2,500 cajas · 3 nov 2026"
+    },
+    "detalleCliente": "Pedido GC-00001 Cotización solicitada× Estado Cotización solicitada3 nov, 04:04 p.m.CotizadoConfirmadoEn producciónEn caminoEntregado Detalle Medidas40 × 30 × 25 cm Cantidad2,500 CorrugadoSencillo FlautaC Resistencia26 ECT Lámina suajadaSí · 120 × 80 cm ImpresiónSí · logo 1 tinta Otrosseparadores Productobotellas 1 L Solicitado3 nov, 04:02 p.m. Cancelar esta solicitud",
+    "loginMalo": "Correo o contraseña incorrectos.",
+    "loginOK": "GC-00001 Cotización solicitada 40 × 30 × 25 cm · 2,500 cajas · 3 nov 2026",
+    "staffLink": true,
+    "panelTabla": "GC-000013 nov 2026 Ana PruebaEmpaques Demo 40×30×25 2,500 1,980 ✓ Suaje, Impresión, Otros Cotización solicitada",
+    "panelConteos": "Activos · 1Todos · 1Cotización solicitada · 1Cotizado · 0Confirmado · 0En producción · 0En camino · 0Entregado · 0Cancelado · 0",
+    "panelDetalle": "5512345678 40 30 25 2,500 26 12 5 1 144 55 0.79 1,980 506 120 80 1 3 04 04",
+    "staffGuardar": {
+      "msg": "✓ Cambios guardados.",
+      "ok": true,
+      "historial": "Cotización solicitada3 nov, 04:04 p.m.Cotizado3 nov, 04:07 p.m."
+    },
+    "panelTablaDespues": "GC-000013 nov 2026 Ana PruebaEmpaques Demo 40×30×25 2,500 1,980 ✓ Suaje, Impresión, Otros Cotizado",
+    "calc": [
+      {
+        "in": [
+          30,
+          20,
+          15,
+          ""
+        ],
+        "nums": "104 35 0.36 1,099",
+        "cumple": null
+      },
+      {
+        "in": [
+          30,
+          20,
+          15,
+          500
+        ],
+        "nums": "104 35 0.36 182 1,099 218",
+        "cumple": "warn"
+      },
+      {
+        "in": [
+          40,
+          30,
+          25,
+          2500
+        ],
+        "nums": "144 55 0.79 1,980 506",
+        "cumple": "ok"
+      },
+      {
+        "in": [
+          12.5,
+          10,
+          8,
+          20000
+        ],
+        "nums": "49 18 0.09 1,764 4,536",
+        "cumple": "ok"
+      },
+      {
+        "in": [
+          100,
+          80,
+          60,
+          50
+        ],
+        "nums": "364 140 5.1 254.8 79 145.2",
+        "cumple": "warn"
+      }
+    ],
+    "calcPegado": {
+      "med": [
+        "40",
+        "30",
+        "25",
+        "2500"
+      ],
+      "nums": "144 55 0.79 1,980 506",
+      "extra": "Cliente: Ana Prueba Empresa: Empaques Demo Teléfono: 5512345678 Corrugado: Sencillo Flauta: C Resistencia: 26 ECT Lámina suajada: SÍ, 120 × 80 cm Impresión: SÍ, logo 1 tinta Otros: separadores"
+    },
+    "clientes": "Staff Uno—5500000000pgonzalezcastro1@gmail.com 0Staff3 nov 2026 Ana PruebaEmpaques Demo5512345678ana@example.com 1Cliente3 nov 2026",
+    "clienteVeEstado": "GC-00001 Cotizado 40 × 30 × 25 cm · 2,500 cajas · 3 nov 2026 · $18,500.50",
+    "clienteDetalleTrasStaff": "Pedido GC-00001 Cotizado× Estado Cotización solicitada3 nov, 04:04 p.m.Cotizado3 nov, 04:07 p.m.ConfirmadoEn producciónEn caminoEntregado Entrega estimada: 20 nov 2026 Precio: $18,500.50 Mensaje de Gloria Curiel:Precio con flete incluido Detalle Medidas40 × 30 × 25 cm Cantidad2,500 CorrugadoSencillo FlautaC Resistencia26 ECT Lámina suajadaSí · 120 × 80 cm ImpresiónSí · logo 1 tinta Otrosseparadores Productobotellas 1 L Solicitado3 nov, 04:02 p.m. Cancelar esta solicitud"
+  }
+}
