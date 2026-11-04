@@ -88,7 +88,7 @@
   .menu a:hover{border-color:var(--kraft)}
   .nav-actions{display:flex;align-items:center;gap:20px}
   .nav-login{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--ink);white-space:nowrap}
-  .nav-login svg{width:18px;height:18px;stroke:var(--ink)}
+  .nav-login svg{width:18px;height:18px;stroke:var(--ink);flex:none}
   .nav-login:hover{color:var(--kraft-dark)}
   .nav .btn{padding:11px 18px;font-size:.9rem}
   .burger{display:none;background:none;border:0;cursor:pointer;padding:8px}
@@ -281,6 +281,113 @@
   .reveal.in{opacity:1;transform:none}
   @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
 
+  /* ====== INTERACCIONES (hover y movimiento) ====== */
+  .progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--kraft);z-index:100;transition:width .1s linear}
+  header{transition:box-shadow .25s}
+  header.scrolled{box-shadow:0 6px 20px rgba(43,36,32,.08)}
+  .nav{transition:height .25s}
+  header.scrolled .nav{height:66px}
+  .menu a{position:relative;border-bottom:0}
+  .menu a::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--kraft);transform:scaleX(0);transform-origin:right;transition:transform .3s ease}
+  .menu a:hover::after,.menu a.activo::after{transform:scaleX(1);transform-origin:left}
+  .menu a.activo{color:var(--kraft-dark)}
+  .btn{transition:background .2s,border-color .2s,color .2s,transform .2s,box-shadow .2s}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(43,36,32,.14)}
+  .btn:active{transform:translateY(0);box-shadow:none}
+  .link-arrow{transition:gap .25s,color .2s}
+  .link-arrow:hover{gap:12px;text-decoration:none}
+  .nav-login svg{transition:transform .25s}
+  .nav-login:hover svg{transform:scale(1.12)}
+  .brand .logo{transition:transform .4s ease}
+  .brand:hover .logo{transform:rotate(-8deg) scale(1.06)}
+
+  /* Portada: ilustración que sigue al cursor */
+  .hero .photo svg{transition:transform .25s ease-out;will-change:transform}
+  .facts div{transition:transform .25s}
+  .facts div:hover{transform:translateY(-3px)}
+  .facts div:hover b{color:var(--kraft-dark)}
+
+  /* Franja de sectores */
+  .sectors li{transition:color .2s;cursor:default}
+  .sectors li:hover{color:var(--kraft-dark)}
+
+  /* Productos */
+  .product{position:relative;transition:transform .3s ease,box-shadow .3s ease,border-color .3s}
+  .product::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:3px;background:var(--kraft);transform:scaleX(0);transform-origin:left;transition:transform .35s ease;z-index:2}
+  .product:hover{transform:translateY(-6px);box-shadow:0 22px 44px rgba(43,36,32,.12);border-color:var(--line-2)}
+  .product:hover::before{transform:scaleX(1)}
+  .product .photo svg{transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+  .product:hover .photo svg{transform:scale(1.1) rotate(-2deg)}
+  .product .photo img{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+  .product:hover .photo img{transform:scale(1.06)}
+  .product h3{transition:color .2s}
+  .product:hover h3{color:var(--kraft-dark)}
+  .product:hover .link-arrow{gap:12px}
+
+  /* Nosotros */
+  .about .photo svg{transition:transform .6s ease}
+  .about .photo:hover svg{transform:scale(1.06)}
+  .commit li{padding:10px;margin:-10px;border-radius:4px;transition:background .2s}
+  .commit li:hover{background:var(--cream)}
+  .commit svg{transition:transform .3s}
+  .commit li:hover svg{transform:scale(1.15)}
+
+  /* Tabla técnica */
+  .spec-table tbody tr{cursor:pointer;transition:background .2s}
+  .spec-table tbody tr td{transition:background .2s,color .2s}
+  .spec-table tbody tr:hover td{background:var(--kraft-pale)!important}
+  .spec-table tbody tr td:first-child{box-shadow:inset 0 0 0 var(--kraft);transition:box-shadow .2s}
+  .spec-table tbody tr:hover td:first-child{box-shadow:inset 4px 0 0 var(--kraft)}
+  .spec-hint{font-size:.85rem;color:var(--soft);margin-top:10px}
+
+  /* Compromiso */
+  .why div{position:relative;transition:background .3s}
+  .why div::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--kraft);transform:scaleX(0);transform-origin:left;transition:transform .35s ease}
+  .why div:hover{background:var(--cream)}
+  .why div:hover::after{transform:scaleX(1)}
+  .why svg{transition:transform .35s ease}
+  .why div:hover svg{transform:translateY(-4px)}
+
+  /* Proceso */
+  .process i{transition:background .3s,color .3s,transform .3s,box-shadow .3s}
+  .process div:hover i{background:var(--kraft);color:#fff;transform:scale(1.1);box-shadow:0 0 0 6px var(--kraft-pale)}
+  .process h3{transition:color .2s}
+  .process div:hover h3{color:var(--kraft-dark)}
+  .process::after{content:"";position:absolute;left:0;top:23px;height:1px;background:var(--kraft);width:var(--avance,0%);transition:width 1.2s ease}
+
+  /* Portal */
+  .portal li{transition:transform .25s}
+  .portal li:hover{transform:translateX(6px)}
+  .portal li:hover b{color:var(--kraft-light)}
+
+  /* Cotizador */
+  input:hover,select:hover,textarea:hover{border-color:var(--kraft-light)}
+  .destacar{animation:destacar 1.6s ease}
+  @keyframes destacar{0%,100%{box-shadow:0 0 0 0 rgba(176,122,66,0)}25%{box-shadow:0 0 0 4px rgba(176,122,66,.35)}}
+
+  /* Preguntas */
+  summary{transition:color .2s,padding .25s}
+  summary:hover{color:var(--kraft-dark);padding-left:8px}
+
+  /* Contacto */
+  .c-item{position:relative;transition:background .25s}
+  .c-item::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--kraft);transform:scaleX(0);transform-origin:left;transition:transform .35s ease}
+  a.c-item:hover::after{transform:scaleX(1)}
+  .c-item svg{transition:transform .3s}
+  a.c-item:hover svg{transform:translateY(-3px) scale(1.08)}
+  footer ul a{transition:color .2s,padding .2s}
+  footer ul a:hover{padding-left:4px}
+
+  /* Botón volver arriba */
+  .to-top{position:fixed;right:22px;bottom:88px;z-index:59;width:44px;height:44px;border-radius:4px;border:1px solid var(--line-2);background:#fff;color:var(--ink);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .25s,transform .25s,background .2s;box-shadow:0 6px 16px rgba(0,0,0,.08)}
+  .to-top.visible{opacity:1;transform:none;pointer-events:auto}
+  .to-top:hover{background:var(--ink);color:#fff}
+  .to-top svg{width:18px;height:18px}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+  }
+
   /* Responsive */
   @media (max-width:1120px){.menu{gap:20px}}
   @media (max-width:1000px){
@@ -331,6 +438,7 @@
 </style>
 </head>
 <body>
+<div class="progress" id="progreso" aria-hidden="true"></div>
 
 <!-- ============ BARRA SUPERIOR ============ -->
 <div class="topbar">
@@ -537,6 +645,7 @@
           <tr><td>BC</td><td>Doble</td><td>7 mm</td><td>Cargas pesadas, estibas altas y exportación.</td></tr>
         </tbody>
       </table>
+      <p class="spec-hint">Haga clic en una flauta para usarla en su cotización.</p>
     </div>
   </div>
 </section>
@@ -1018,6 +1127,78 @@
       ? `<b>Bienvenido(a), ${GC.esc(profile?.nombre || "")}.</b> Recuperamos su cotización. Revísela y envíela cuando esté lista.`
       : `Sesión iniciada como <b>${GC.esc(profile?.nombre || user.email)}</b>. Su cotización se guardará en <a href="cuenta.html">su cuenta</a>.`;
     if (recuperado && location.hash === "#cotizar") setTimeout(() => $("cotizar").scrollIntoView(), 50);
+  })();
+</script>
+
+<button class="to-top" id="arriba" aria-label="Volver arriba"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+<script>
+  // ====== Interacciones ======
+  (function () {
+    const reducir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const header = document.querySelector("header"), barra = document.getElementById("progreso"), arriba = document.getElementById("arriba");
+
+    // Encabezado compacto, barra de progreso y botón "volver arriba"
+    function alDesplazar() {
+      const y = window.scrollY, h = document.documentElement.scrollHeight - innerHeight;
+      header.classList.toggle("scrolled", y > 40);
+      barra.style.width = (h > 0 ? (y / h) * 100 : 0) + "%";
+      arriba.classList.toggle("visible", y > 700);
+    }
+    addEventListener("scroll", alDesplazar, { passive: true }); alDesplazar();
+    arriba.addEventListener("click", () => scrollTo({ top: 0, behavior: reducir ? "auto" : "smooth" }));
+
+    // Resaltar en el menú la sección visible
+    const enlaces = [...document.querySelectorAll('.menu a[href^="#"]')];
+    if ("IntersectionObserver" in window) {
+      const obs = new IntersectionObserver(es => es.forEach(e => {
+        if (e.isIntersecting) enlaces.forEach(a => a.classList.toggle("activo", a.getAttribute("href") === "#" + e.target.id));
+      }), { rootMargin: "-45% 0px -50% 0px" });
+      enlaces.forEach(a => { const sec = document.querySelector(a.getAttribute("href")); if (sec) obs.observe(sec); });
+    }
+
+    // Ilustración de la portada sigue al cursor
+    const foto = document.querySelector(".hero .photo"), arte = foto && foto.querySelector("svg, img");
+    if (foto && arte && !reducir && matchMedia("(hover: hover)").matches) {
+      foto.addEventListener("mousemove", e => {
+        const r = foto.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+        arte.style.transform = `perspective(900px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translate(${x * 10}px, ${y * 10}px)`;
+      });
+      foto.addEventListener("mouseleave", () => arte.style.transform = "");
+    }
+
+    // Conteo animado del pedido mínimo
+    const cifra = document.querySelector(".facts b");
+    if (cifra && !reducir && "IntersectionObserver" in window) {
+      const fin = 400;
+      new IntersectionObserver((es, o) => es.forEach(e => {
+        if (!e.isIntersecting) return; o.disconnect();
+        const t0 = performance.now();
+        (function paso(t) {
+          const p = Math.min(1, (t - t0) / 1200), v = Math.round(fin * (1 - Math.pow(1 - p, 3)));
+          cifra.innerHTML = v + " m²"; if (p < 1) requestAnimationFrame(paso);
+        })(t0);
+      }), { threshold: .6 }).observe(cifra);
+    }
+
+    // Línea de avance en "Cómo trabajamos"
+    const proceso = document.querySelector(".process");
+    if (proceso && "IntersectionObserver" in window) {
+      new IntersectionObserver((es, o) => es.forEach(e => { if (e.isIntersecting) { proceso.style.setProperty("--avance", "100%"); o.disconnect(); } }), { threshold: .5 }).observe(proceso);
+    }
+
+    // Clic en la tabla técnica: usar esa flauta en el cotizador
+    document.querySelectorAll(".spec-table tbody tr").forEach(tr => {
+      tr.title = "Usar esta flauta en su cotización";
+      tr.addEventListener("click", () => {
+        const fl = tr.cells[0].textContent.trim(), corr = tr.cells[1].textContent.trim();
+        const sel = document.getElementById("corrugado");
+        sel.value = corr; sel.dispatchEvent(new Event("change"));
+        document.getElementById("flauta").value = fl;
+        document.getElementById("flauta").dispatchEvent(new Event("change"));
+        document.getElementById("cotizar").scrollIntoView({ behavior: reducir ? "auto" : "smooth" });
+        ["corrugado", "flauta"].forEach(id => { const el = document.getElementById(id); el.classList.remove("destacar"); void el.offsetWidth; el.classList.add("destacar"); });
+      });
+    });
   })();
 </script>
 </body>
