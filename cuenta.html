@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6 58 19 32 32 6 19Z' fill='%23D9A86C'/%3E%3Cpath d='M6 19 32 32v26L6 45Z' fill='%23B9824A'/%3E%3Cpath d='M58 19 32 32v26l26-13Z' fill='%23A06E3B'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="index.html" class="brand">
       <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 58 19 32 32 6 19Z" fill="#D9A86C"/><path d="M6 19 32 32v26L6 45Z" fill="#B9824A"/><path d="M58 19 32 32v26l26-13Z" fill="#A06E3B"/><path d="M19 12.5 45 25.5v8l-6 3v-8L13 15.5Z" fill="#F1DDBC"/></svg>
-      <div><b>Gloria Curiel</b><small>Mi cuenta</small></div>
+      <div><b>GLORIA CURIEL</b><small>Mi cuenta</small></div>
     </a>
     <nav>
       <a href="index.html" class="hide-sm">Inicio</a>
@@ -36,7 +36,7 @@
   <!-- ====== LOGIN / REGISTRO ====== -->
   <section class="auth" id="vistaAuth" hidden>
     <h1 class="title" id="tituloAuth">Bienvenido</h1>
-    <p class="lead" id="leadAuth">Entra para ver tus pedidos y el estado de tus cajas.</p>
+    <p class="lead" id="leadAuth">Ingrese para consultar sus pedidos y el estado de sus entregas.</p>
     <div class="tabs" role="tablist">
       <button role="tab" aria-selected="true" data-tab="login">Iniciar sesión</button>
       <button role="tab" aria-selected="false" data-tab="registro">Crear cuenta</button>
@@ -46,7 +46,7 @@
       <div class="field"><label for="lEmail">Correo</label><input id="lEmail" type="email" required autocomplete="email"></div>
       <div class="field"><label for="lPass">Contraseña</label><input id="lPass" type="password" required autocomplete="current-password"></div>
       <button class="btn primary" style="width:100%">Entrar</button>
-      <p style="margin-top:12px;text-align:center"><a href="#" id="olvide">¿Olvidaste tu contraseña?</a></p>
+      <p style="margin-top:12px;text-align:center"><a href="#" id="olvide">¿Olvidó su contraseña?</a></p>
       <div class="msg" id="lMsg" hidden></div>
     </form>
 
@@ -98,7 +98,7 @@
 
   const traducir = m => /Invalid login/i.test(m) ? "Correo o contraseña incorrectos."
     : /already registered/i.test(m) ? "Ya existe una cuenta con ese correo."
-    : /Email not confirmed/i.test(m) ? "Confirma tu correo: te enviamos un enlace para activar tu cuenta."
+    : /Email not confirmed/i.test(m) ? "Confirme su correo: le enviamos un enlace para activar su cuenta."
     : m;
 
   $("fLogin").addEventListener("submit", async e => {
@@ -117,7 +117,7 @@
                  emailRedirectTo: location.href.split("#")[0] }
     });
     if (error) return aviso($("rMsg"), traducir(error.message));
-    if (!data.session) return aviso($("rMsg"), "¡Listo! Te enviamos un correo para confirmar tu cuenta. Después inicia sesión.", "ok");
+    if (!data.session) return aviso($("rMsg"), "Le enviamos un correo para confirmar su cuenta. Después inicie sesión.", "ok");
     if (volverACotizar) return irACotizar();
     iniciar();
   });
@@ -125,9 +125,9 @@
   $("olvide").addEventListener("click", async e => {
     e.preventDefault();
     const email = $("lEmail").value.trim();
-    if (!email) return aviso($("lMsg"), "Escribe tu correo y vuelve a dar clic en “¿Olvidaste tu contraseña?”.");
+    if (!email) return aviso($("lMsg"), "Escriba su correo y vuelva a dar clic en “¿Olvidó su contraseña?”.");
     const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("#")[0] });
-    aviso($("lMsg"), error ? traducir(error.message) : "Te enviamos un correo para cambiar tu contraseña.", error ? "err" : "ok");
+    aviso($("lMsg"), error ? traducir(error.message) : "Le enviamos un correo para restablecer su contraseña.", error ? "err" : "ok");
   });
 
   $("salir").addEventListener("click", async () => { await client.auth.signOut(); location.reload(); });
@@ -139,7 +139,7 @@
   }
   function pintarLista() {
     if (!pedidos.length) {
-      $("lista").innerHTML = `<div class="card empty">Aún no tienes pedidos.<br><br><a class="btn primary" href="index.html#cotizar">Hacer mi primera cotización</a></div>`;
+      $("lista").innerHTML = `<div class="card empty">Aún no tiene pedidos registrados.<br><br><a class="btn primary" href="index.html#cotizar">Solicitar cotización</a></div>`;
       return;
     }
     $("lista").innerHTML = pedidos.map(o => `
@@ -188,7 +188,7 @@
       ${["cotizacion_solicitada", "cotizado"].includes(o.status) ? `<p style="margin-top:18px"><button class="btn ghost small" id="cancelar">Cancelar esta solicitud</button></p>` : ""}`;
     const c = $("cancelar");
     if (c) c.addEventListener("click", async () => {
-      if (!confirm("¿Seguro que quieres cancelar este pedido?")) return;
+      if (!confirm("¿Desea cancelar este pedido?")) return;
       const { error } = await client.from("orders").update({ status: "cancelado" }).eq("id", o.id);
       if (error) return alert("No se pudo cancelar: " + error.message);
       $("dlg").close(); cargar();
@@ -201,7 +201,7 @@
     const { data, error } = await client.from("orders")
       .select("id, created_at, status, largo, ancho, alto, cantidad, corrugado, flauta, resistencia, req_suaje, suaje_largo, suaje_ancho, req_impresion, impresion_det, otros, producto, precio, mensaje_cliente, fecha_entrega")
       .order("created_at", { ascending: false });
-    if (error) { $("lista").innerHTML = `<div class="msg err">No se pudieron cargar tus pedidos: ${esc(error.message)}</div>`; return; }
+    if (error) { $("lista").innerHTML = `<div class="msg err">No se pudieron cargar sus pedidos: ${esc(error.message)}</div>`; return; }
     pedidos = data; pintarLista();
     const abrirId = +new URLSearchParams(location.search).get("pedido");
     if (abrirId && pedidos.some(p => p.id === abrirId)) abrir(abrirId);
@@ -210,8 +210,8 @@
   // Abrir en "Crear cuenta" y rellenar con lo que escribió en el cotizador
   if (params.get("modo") === "registro") document.querySelector('[data-tab="registro"]').click();
   if (volverACotizar) {
-    $("tituloAuth").textContent = "Crea tu cuenta o inicia sesión";
-    $("leadAuth").textContent = "Al terminar te regresamos a tu cotización con todo lo que ya llenaste.";
+    $("tituloAuth").textContent = "Cree su cuenta o inicie sesión";
+    $("leadAuth").textContent = "Al terminar, regresará a su cotización con la información que ya capturó.";
   }
   try {
     const b = JSON.parse(localStorage.getItem("gc_borrador") || "null");
